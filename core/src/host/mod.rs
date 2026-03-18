@@ -1,12 +1,8 @@
 mod utils;
-use crate::host::utils::{extract_lines_with_numbers, is_duplicate_entry};
-use std::{
-    fmt,
-    fs::File,
-    io::{BufReader, Error},
-    net::IpAddr,
-};
+use crate::host::utils::{is_duplicate_entry, parse_line};
+use std::{fmt, io, net::IpAddr};
 
+#[derive(Debug, Clone, PartialEq)]
 pub enum HostStatus {
     Active,
     Inactive,
@@ -21,6 +17,7 @@ impl fmt::Display for HostStatus {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct HostEntry {
     pub status: HostStatus,
     pub ip: IpAddr,
@@ -36,37 +33,39 @@ impl HostEntry {
     }
 }
 
-pub fn parse_contents(contents: std::io::Lines<BufReader<File>>) -> Vec<HostEntry> {
-    let mut host_entries = Vec::<HostEntry>::new();
-    for line in contents.map_while(Result::ok) {
-        if let Ok(matched) = extract_lines_with_numbers(&line) {
-            if matched.contains('#') {
-                let parts: Vec<&str> = matched.split_whitespace().collect();
-                let ip: IpAddr = parts[1].parse().expect("Invalid IP address");
-                let name = parts[2].to_string();
-                host_entries.push(HostEntry {
-                    status: HostStatus::Inactive,
-                    ip,
-                    name,
-                });
-            } else {
-                let parts: Vec<&str> = matched.split_whitespace().collect();
-                let ip: IpAddr = parts[0].parse().expect("Invalid IP address");
-                let name = parts[1].to_string();
-                host_entries.push(HostEntry {
-                    status: HostStatus::Active,
-                    ip,
-                    name,
-                });
-            }
-        }
+impl fmt::Display for HostEntry {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}: {} is {}", self.ip, self.name, self.status)
     }
-    host_entries
 }
 
-pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: String) -> Result<(), Error> {
-    if is_duplicate_entry(ip, name.clone(), entries) {
-        return Err(Error::new(std::io::ErrorKind::Other, "Duplicate entry"));
+#[derive(Debug)]
+pub enum HostError {
+    DuplicateEntry,
+    EntryNotFound,
+}
+
+impl fmt::Display for HostError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            HostError::DuplicateEntry => write!(f, "Entry already exists"),
+            HostError::EntryNotFound => write!(f, "No matching entries found"),
+        }
+    }
+}
+
+impl std::error::Error for HostError {}
+
+pub fn parse_contents(contents: impl Iterator<Item = io::Result<String>>) -> Vec<HostEntry> {
+    contents
+        .map_while(Result::ok)
+        .filter_map(|line| parse_line(&line))
+        .collect()
+}
+
+pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: String) -> Result<(), HostError> {
+    if is_duplicate_entry(ip, &name, entries) {
+        return Err(HostError::DuplicateEntry);
     }
     entries.push(HostEntry {
         status: HostStatus::Active,
@@ -76,25 +75,31 @@ pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: String) -> Resu
     Ok(())
 }
 
-pub fn remove_entry(entries: &mut Vec<HostEntry>, partial_name: &str) {
+pub fn remove_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<(), HostError> {
+    let original_len = entries.len();
     entries.retain(|e| !e.name.contains(partial_name));
+    if entries.len() == original_len {
+        return Err(HostError::EntryNotFound);
+    }
+    Ok(())
 }
 
-pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) {
+pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<(), HostError> {
+    let mut found = false;
     for entry in entries.iter_mut() {
         if entry.name.contains(partial_name) {
             entry.toggle();
+            found = true;
         }
     }
+    if !found {
+        return Err(HostError::EntryNotFound);
+    }
+    Ok(())
 }
 
 pub fn print_entries(entries: &[HostEntry]) {
-    println!(
-        "{}",
-        entries
-            .iter()
-            .map(|e| format!("{}: {} is {}", e.ip, e.name, e.status))
-            .collect::<Vec<String>>()
-            .join("\n")
-    );
+    for entry in entries {
+        println!("{}", entry);
+    }
 }

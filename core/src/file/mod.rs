@@ -1,5 +1,5 @@
 mod utils;
-use crate::file::utils::write_toggled_version;
+use crate::file::utils::write_entries;
 use crate::host::HostEntry;
 use ::std::{
     fs::File,
@@ -20,6 +20,6 @@ where
     P: AsRef<Path>,
 {
     let mut file = File::create(filename)?;
-    write_toggled_version(entries, &mut file)?;
+    write_entries(entries, &mut file)?;
     Ok(())
 }

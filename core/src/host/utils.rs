@@ -1,32 +1,42 @@
-use crate::host::HostEntry;
+use crate::host::{HostEntry, HostStatus};
 use regex::Regex;
-use std::{io::Error, net::IpAddr};
+use std::{net::IpAddr, sync::OnceLock};
 
-pub fn extract_lines_with_numbers(line: &str) -> Result<&str, regex::Error> {
-    let regex = Regex::new(r"[0-9]+").expect("Invalid regex pattern");
-    if regex.is_match(line) {
-        return Ok(line);
+static HOST_LINE_REGEX: OnceLock<Regex> = OnceLock::new();
+
+pub fn parse_line(line: &str) -> Option<HostEntry> {
+    if !line_has_numbers(line) {
+        return None;
     }
-    Err(regex::Error::Syntax(String::from("Pattern parsing error")))
+    let parts: Vec<&str> = line.split_whitespace().collect();
+    let offset = count_hash_offset(&parts);
+    let status = status_from_offset(offset);
+    let ip = parts.get(offset)?.parse::<IpAddr>().ok()?;
+    let name = parts.get(offset + 1)?.to_string();
+    Some(HostEntry { status, ip, name })
 }
 
-// pub fn extract_ip_and_name(line: &str) -> Result<Option<(IpAddr, String)>, Error> {
-//     let parts: Vec<&str> = line.split_whitespace().collect();
-//     if parts.len() == 2 {
-//         Ok(Some((
-//             parts[0].parse().expect("Invalid IP address"),
-//             parts[1].to_string(),
-//         )))
-//     } else if parts.len() == 3 {
-//         Ok(Some((
-//             parts[1].parse().expect("Invalid IP address"),
-//             parts[2].to_string(),
-//         )))
-//     } else {
-//         Err(Error::new(std::io::ErrorKind::Other, "Invalid line format"))
-//     }
-// }
-
-pub fn is_duplicate_entry(ip: IpAddr, name: String, entries: &[HostEntry]) -> bool {
+pub fn is_duplicate_entry(ip: IpAddr, name: &str, entries: &[HostEntry]) -> bool {
     entries.iter().any(|e| e.ip == ip && e.name == name)
+}
+
+fn line_has_numbers(line: &str) -> bool {
+    HOST_LINE_REGEX
+        .get_or_init(|| Regex::new(r"[0-9]+").expect("Invalid regex pattern"))
+        .is_match(line)
+}
+
+fn count_hash_offset(parts: &[&str]) -> usize {
+    parts
+        .iter()
+        .take_while(|p| p.chars().all(|c| c == '#'))
+        .count()
+}
+
+fn status_from_offset(offset: usize) -> HostStatus {
+    if offset > 0 {
+        HostStatus::Inactive
+    } else {
+        HostStatus::Active
+    }
 }
