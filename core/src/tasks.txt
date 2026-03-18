@@ -1,0 +1,5 @@
+1. Need to add error handling to remove_entry
+2. Need to add error handling to toggle_entry
+3. Need to propagate the same error messages to the main caller
+4. Need to enhance parse_contents by removing extra '#'
+5. Need to add tests to make sure the functions work.
