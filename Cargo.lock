@@ -12,7 +12,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "hostcraft"
+name = "hostcraft-cli"
+version = "0.1.0"
+
+[[package]]
+name = "hostcraft-core"
 version = "0.1.0"
 dependencies = [
  "regex",
