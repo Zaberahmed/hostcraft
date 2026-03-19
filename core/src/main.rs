@@ -1,5 +1,5 @@
-use hostcraft::file;
-use hostcraft::host;
+use hostcraft_core::file;
+use hostcraft_core::host;
 use std::net::Ipv4Addr;
 
 fn main() {
