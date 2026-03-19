@@ -48,8 +48,8 @@ pub enum HostError {
 impl fmt::Display for HostError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HostError::DuplicateEntry => write!(f, "Entry already exists"),
-            HostError::EntryNotFound => write!(f, "No matching entries found"),
+            HostError::DuplicateEntry => write!(f, "You have inserted a duplicate entry"),
+            HostError::EntryNotFound => write!(f, "Please check the name and try again"),
         }
     }
 }
