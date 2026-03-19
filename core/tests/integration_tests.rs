@@ -1,6 +1,6 @@
-use hostcraft::file;
-use hostcraft::host;
-use hostcraft::{HostEntry, HostStatus};
+use hostcraft_core::file;
+use hostcraft_core::host;
+use hostcraft_core::{HostEntry, HostStatus};
 use std::net::{IpAddr, Ipv4Addr};
 
 // --- Helpers ---
