@@ -2,5 +2,14 @@
 name = "hostcraft-cli"
 version = "0.1.0"
 edition = "2024"
+authors = ["Sk. Zaber Ahmed"]
+license = "MIT"
+description = "CLI for Hostcraft"
+repository = "https://github.com/Zaberahmed/hostcraft"
+
+[[bin]]
+name = "hostcraft"
+path = "src/main.rs"
 
 [dependencies]
+hostcraft-core = "0.1.1"
