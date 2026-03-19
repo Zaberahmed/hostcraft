@@ -5,6 +5,7 @@ edition = "2024"
 authors = ["Sk. Zaber Ahmed"]
 description = "Core functions for hostcraft"
 license = "MIT"
+repository = "https://github.com/Zaberahmed/hostcraft"
 
 [dependencies]
 regex = "1.12.3"
