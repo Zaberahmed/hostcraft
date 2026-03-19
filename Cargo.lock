@@ -14,10 +14,22 @@ dependencies = [
 [[package]]
 name = "hostcraft-cli"
 version = "0.1.0"
+dependencies = [
+ "hostcraft-core 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "hostcraft-core"
-version = "0.1.0"
+version = "0.1.1"
+dependencies = [
+ "regex",
+]
+
+[[package]]
+name = "hostcraft-core"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a67bbb2ad4913f45699d07562266e887ca4b732e6bd36ff962c830a86bfb2f49"
 dependencies = [
  "regex",
 ]
