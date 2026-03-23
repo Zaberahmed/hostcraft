@@ -1,3 +1,4 @@
+use crate::display::{print_entries, print_success};
 use clap::{Parser, Subcommand};
 use hostcraft_core::{HostError, file, host};
 use std::error::Error;
@@ -8,22 +9,20 @@ const HOSTS_FILE: &str = "/etc/hosts";
 #[derive(Parser)]
 #[command(
     name = "hostcraft",
-    about = "Manage your host entries from the terminal",
+    about = "Manage your /etc/hosts file from the terminal",
     version
 )]
-
 pub struct Cli {
     /// Path to the hosts file (override for testing or non-standard setups)
     #[arg(long, default_value = HOSTS_FILE)]
-    file: String,
+    pub file: String,
 
-    // Commands to execute (subcommands)
     #[command(subcommand)]
-    command: Command,
+    pub command: Command,
 }
 
 #[derive(Subcommand)]
-enum Command {
+pub enum Command {
     /// List all host entries
     List,
 
@@ -57,49 +56,46 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
 
     match cli.command {
         Command::List => {
-            host::print_entries(&entries);
+            print_entries(&entries);
         }
 
         Command::Add { name, ip } => {
-            host::add_entry(&mut entries, ip, name).map_err(|e| match e {
-                HostError::DuplicateEntry => {
-                    format!("Entry already exists. {}", e)
-                }
-                _ => format!("Failed to add entry:{}", e),
+            host::add_entry(&mut entries, ip, name.clone()).map_err(|e| match e {
+                HostError::DuplicateEntry => format!("Entry already exists: {}", e),
+                _ => format!("Failed to add entry: {}", e),
             })?;
 
             file::write_file(&cli.file, &entries)
                 .map_err(|e| format!("Failed to write hosts file '{}': {}", cli.file, e))?;
 
-            host::print_entries(&entries);
+            print_success(&format!("Added '{}'", name));
+            print_entries(&entries);
         }
 
         Command::Remove { name } => {
             host::remove_entry(&mut entries, &name).map_err(|e| match e {
-                HostError::EntryNotFound => {
-                    format!("No entry found matching '{}'. {}", name, e)
-                }
+                HostError::EntryNotFound => format!("No entry found matching '{}': {}", name, e),
                 _ => format!("Failed to remove entry: {}", e),
             })?;
 
             file::write_file(&cli.file, &entries)
                 .map_err(|e| format!("Failed to write hosts file '{}': {}", cli.file, e))?;
 
-            host::print_entries(&entries);
+            print_success(&format!("Removed '{}'", name));
+            print_entries(&entries);
         }
 
         Command::Toggle { name } => {
             host::toggle_entry(&mut entries, &name).map_err(|e| match e {
-                HostError::EntryNotFound => {
-                    format!("No entry found matching '{}'. {}", name, e)
-                }
+                HostError::EntryNotFound => format!("No entry found matching '{}': {}", name, e),
                 _ => format!("Failed to toggle entry: {}", e),
             })?;
 
             file::write_file(&cli.file, &entries)
                 .map_err(|e| format!("Failed to write hosts file '{}': {}", cli.file, e))?;
 
-            host::print_entries(&entries);
+            print_success(&format!("Toggled '{}'", name));
+            print_entries(&entries);
         }
     }
 
