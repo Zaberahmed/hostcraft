@@ -98,12 +98,6 @@ pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<
     Ok(())
 }
 
-pub fn print_entries(entries: &[HostEntry]) {
-    for entry in entries {
-        println!("{}", entry);
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
