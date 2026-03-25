@@ -17,7 +17,7 @@ impl fmt::Display for HostStatus {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct HostEntry {
     pub status: HostStatus,
     pub ip: IpAddr,
@@ -63,14 +63,18 @@ pub fn parse_contents(contents: impl Iterator<Item = io::Result<String>>) -> Vec
         .collect()
 }
 
-pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: String) -> Result<(), HostError> {
-    if is_duplicate_entry(ip, &name, entries) {
+pub fn add_entry(
+    entries: &mut Vec<HostEntry>,
+    ip: IpAddr,
+    name: impl Into<String>,
+) -> Result<(), HostError> {
+    if is_duplicate_entry(entries, ip, &name.into()) {
         return Err(HostError::DuplicateEntry);
     }
     entries.push(HostEntry {
         status: HostStatus::Active,
         ip,
-        name,
+        name: name.into(),
     });
     Ok(())
 }

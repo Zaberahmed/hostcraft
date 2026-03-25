@@ -1,7 +1,7 @@
 mod utils;
 use crate::file::utils::write_entries;
 use crate::host::HostEntry;
-use ::std::{
+use std::{
     fs::File,
     io::{self, BufRead},
     path::Path,
