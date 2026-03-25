@@ -1,15 +1,21 @@
+mod utils;
+
 use crate::display::{print_entries, print_success};
 use clap::{Parser, Subcommand};
 use hostcraft_core::{HostError, file, host};
-use std::error::Error;
-use std::net::IpAddr;
+use std::{error::Error, net::IpAddr};
+use utils::write_hosts;
 
-const HOSTS_FILE: &str = "/etc/hosts";
+const HOSTS_FILE: &str = if cfg!(target_os = "windows") {
+    r"C:\Windows\System32\drivers\etc\hosts"
+} else {
+    "/etc/hosts"
+};
 
 #[derive(Parser)]
 #[command(
     name = "hostcraft",
-    about = "Manage your /etc/hosts file from the terminal",
+    about = "Manage your system hosts file from the terminal",
     version
 )]
 pub struct Cli {
@@ -65,8 +71,7 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
                 _ => format!("Failed to add entry: {}", e),
             })?;
 
-            file::write_file(&cli.file, &entries)
-                .map_err(|e| format!("Failed to write hosts file '{}': {}", cli.file, e))?;
+            write_hosts(&cli.file, &entries)?;
 
             print_success(&format!("Added '{}'", name));
             print_entries(&entries);
@@ -78,8 +83,7 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
                 _ => format!("Failed to remove entry: {}", e),
             })?;
 
-            file::write_file(&cli.file, &entries)
-                .map_err(|e| format!("Failed to write hosts file '{}': {}", cli.file, e))?;
+            write_hosts(&cli.file, &entries)?;
 
             print_success(&format!("Removed '{}'", name));
             print_entries(&entries);
@@ -91,8 +95,7 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
                 _ => format!("Failed to toggle entry: {}", e),
             })?;
 
-            file::write_file(&cli.file, &entries)
-                .map_err(|e| format!("Failed to write hosts file '{}': {}", cli.file, e))?;
+            write_hosts(&cli.file, &entries)?;
 
             print_success(&format!("Toggled '{}'", name));
             print_entries(&entries);
