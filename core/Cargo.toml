@@ -1,9 +1,9 @@
 [package]
 name = "hostcraft-core"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2024"
 authors = ["Sk. Zaber Ahmed"]
-description = "Core library for the hostcraft ecosystem — parsing, manipulation and file I/O for /etc/hosts"
+description = "Core library for the hostcraft ecosystem — parsing, manipulation and file I/O for system hosts"
 license = "MIT"
 repository = "https://github.com/Zaberahmed/hostcraft"
 readme = "README.md"
