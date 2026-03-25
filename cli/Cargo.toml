@@ -9,13 +9,14 @@ repository = "https://github.com/Zaberahmed/hostcraft"
 readme = "README.md"
 keywords = ["hosts", "networking", "dns", "cli", "system"]
 categories = ["command-line-utilities", "network-programming"]
+features = ["Add host entry", "Remove host entry", "Toggle host entry", "List host entries"]
 
 [[bin]]
 name = "hostcraft"
 path = "src/main.rs"
 
 [dependencies]
-hostcraft-core = "0.1.4"
+hostcraft-core = "0.1.5"
 clap = { version = "4", features = ["derive"] }
 anstyle = "1"
 anstream = "1"
