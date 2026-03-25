@@ -68,13 +68,14 @@ pub fn add_entry(
     ip: IpAddr,
     name: impl Into<String>,
 ) -> Result<(), HostError> {
-    if is_duplicate_entry(entries, ip, &name.into()) {
+    let name = name.into();
+    if is_duplicate_entry(entries, ip, &name) {
         return Err(HostError::DuplicateEntry);
     }
     entries.push(HostEntry {
         status: HostStatus::Active,
         ip,
-        name: name.into(),
+        name,
     });
     Ok(())
 }
