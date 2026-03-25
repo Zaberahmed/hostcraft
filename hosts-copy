@@ -1,0 +1,7 @@
+127.0.0.1 localhost
+255.255.255.255 broadcasthost
+::1 localhost
+# 127.0.0.1 local.creolytix.de
+# 127.0.0.1 dbbaew-dsjsx.seliseblocks.com
+127.0.0.1 dev-cloud.seliseblocks.com
+255.255.255.0 testing.hostcraft.com
