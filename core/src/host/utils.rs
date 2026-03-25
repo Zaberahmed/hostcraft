@@ -16,7 +16,7 @@ pub fn parse_line(line: &str) -> Option<HostEntry> {
     Some(HostEntry { status, ip, name })
 }
 
-pub fn is_duplicate_entry(ip: IpAddr, name: &str, entries: &[HostEntry]) -> bool {
+pub fn is_duplicate_entry(entries: &[HostEntry], ip: IpAddr, name: &str) -> bool {
     entries.iter().any(|e| e.ip == ip && e.name == name)
 }
 
@@ -181,26 +181,26 @@ mod tests {
     fn is_duplicate_entry_matching_ip_and_name_returns_true() {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
         let entries = vec![parse_line("127.0.0.1 hostname.com").unwrap()];
-        assert!(is_duplicate_entry(ip, "hostname.com", &entries));
+        assert!(is_duplicate_entry(&entries, ip, "hostname.com"));
     }
 
     #[test]
     fn is_duplicate_entry_same_ip_different_name_returns_false() {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
         let entries = vec![parse_line("127.0.0.1 hostname.com").unwrap()];
-        assert!(!is_duplicate_entry(ip, "other.com", &entries));
+        assert!(!is_duplicate_entry(&entries, ip, "other.com"));
     }
 
     #[test]
     fn is_duplicate_entry_different_ip_same_name_returns_false() {
         let ip = IpAddr::V4(Ipv4Addr::new(192, 168, 0, 1));
         let entries = vec![parse_line("127.0.0.1 hostname.com").unwrap()];
-        assert!(!is_duplicate_entry(ip, "hostname.com", &entries));
+        assert!(!is_duplicate_entry(&entries, ip, "hostname.com"));
     }
 
     #[test]
     fn is_duplicate_entry_empty_entries_returns_false() {
         let ip = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-        assert!(!is_duplicate_entry(ip, "hostname.com", &[]));
+        assert!(!is_duplicate_entry(&[], ip, "hostname.com"));
     }
 }

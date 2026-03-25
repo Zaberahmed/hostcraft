@@ -117,22 +117,24 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 name = "hostcraft-cli"
 version = "0.1.0"
 dependencies = [
+ "anstream",
+ "anstyle",
  "clap",
- "hostcraft-core 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hostcraft-core 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "hostcraft-core"
-version = "0.1.1"
+version = "0.1.5"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "hostcraft-core"
-version = "0.1.1"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a67bbb2ad4913f45699d07562266e887ca4b732e6bd36ff962c830a86bfb2f49"
+checksum = "a0a545c2e0f02cf739c870448db1909bb0234dd9745bacfd33016317034ac54f"
 dependencies = [
  "regex",
 ]

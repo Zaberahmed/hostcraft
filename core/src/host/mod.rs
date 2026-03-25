@@ -17,7 +17,7 @@ impl fmt::Display for HostStatus {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct HostEntry {
     pub status: HostStatus,
     pub ip: IpAddr,
@@ -48,8 +48,8 @@ pub enum HostError {
 impl fmt::Display for HostError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            HostError::DuplicateEntry => write!(f, "Entry already exists"),
-            HostError::EntryNotFound => write!(f, "No matching entries found"),
+            HostError::DuplicateEntry => write!(f, "You have inserted a duplicate entry."),
+            HostError::EntryNotFound => write!(f, "Please check the name and try again."),
         }
     }
 }
@@ -63,8 +63,13 @@ pub fn parse_contents(contents: impl Iterator<Item = io::Result<String>>) -> Vec
         .collect()
 }
 
-pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: String) -> Result<(), HostError> {
-    if is_duplicate_entry(ip, &name, entries) {
+pub fn add_entry(
+    entries: &mut Vec<HostEntry>,
+    ip: IpAddr,
+    name: impl Into<String>,
+) -> Result<(), HostError> {
+    let name = name.into();
+    if is_duplicate_entry(entries, ip, &name) {
         return Err(HostError::DuplicateEntry);
     }
     entries.push(HostEntry {
@@ -96,12 +101,6 @@ pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<
         return Err(HostError::EntryNotFound);
     }
     Ok(())
-}
-
-pub fn print_entries(entries: &[HostEntry]) {
-    for entry in entries {
-        println!("{}", entry);
-    }
 }
 
 #[cfg(test)]

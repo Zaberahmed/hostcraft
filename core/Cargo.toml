@@ -1,11 +1,15 @@
 [package]
 name = "hostcraft-core"
-version = "0.1.1"
+version = "0.1.5"
 edition = "2024"
 authors = ["Sk. Zaber Ahmed"]
-description = "Core functions for hostcraft"
+description = "Core library for the hostcraft ecosystem — parsing, manipulation and file I/O for system hosts"
 license = "MIT"
 repository = "https://github.com/Zaberahmed/hostcraft"
+readme = "README.md"
+keywords = ["hosts", "networking", "dns", "cli", "system"]
+categories = ["network-programming", "command-line-utilities"]
+features = ["Parse system hosts file", "Add, remove, update hosts entries"]
 
 [dependencies]
 regex = "1.12.3"
