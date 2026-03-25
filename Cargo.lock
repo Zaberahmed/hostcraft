@@ -120,14 +120,12 @@ dependencies = [
  "anstream",
  "anstyle",
  "clap",
- "hostcraft-core 0.1.1",
+ "hostcraft-core 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "hostcraft-core"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a67bbb2ad4913f45699d07562266e887ca4b732e6bd36ff962c830a86bfb2f49"
+version = "0.1.3"
 dependencies = [
  "regex",
 ]
@@ -135,6 +133,8 @@ dependencies = [
 [[package]]
 name = "hostcraft-core"
 version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cade479aa6d75b85088e291db623046eec3780fb2ee51e4898474bdf0ff8f509"
 dependencies = [
  "regex",
 ]
