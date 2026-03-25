@@ -60,7 +60,7 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
         }
 
         Command::Add { name, ip } => {
-            host::add_entry(&mut entries, ip, name.clone()).map_err(|e| match e {
+            host::add_entry(&mut entries, ip, name.as_str()).map_err(|e| match e {
                 HostError::DuplicateEntry => format!("Entry already exists. {}", e),
                 _ => format!("Failed to add entry: {}", e),
             })?;
