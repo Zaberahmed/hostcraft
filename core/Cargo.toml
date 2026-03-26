@@ -9,7 +9,6 @@ repository = "https://github.com/Zaberahmed/hostcraft"
 readme = "README.md"
 keywords = ["hosts", "networking", "dns", "cli", "system"]
 categories = ["network-programming", "command-line-utilities"]
-features = ["Parse system hosts file", "Add, remove, update hosts entries"]
 
 [dependencies]
 regex = "1.12.3"
