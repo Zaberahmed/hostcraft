@@ -1,45 +1,65 @@
-# HostCraft
+# Hostcraft
 
-```
-hosts-tool/
-│
-├── core/                          # Shared logic (pure TS/Rust)
-│   ├── parser.ts                  # Parse hosts file into structured data
-│   ├── writer.ts                  # Write back safely (with backup)
-│   └── types.ts                   # HostEntry, Group, etc.
-│
-├── cli/                           # CLI interface (consumes core)
-│   └── index.ts                   # Commands: add, remove, toggle, list
-│
-└── gui/                           # Tauri app (consumes core)
-    ├── src/                       # Frontend UI
-    └── src-tauri/                 # Rust shell (minimal)
-        └── main.rs                # Calls into core via sidecar or commands
-```
-```
-CLI  →  Node.js + TypeScript  (published to npm)
-         • You know TS already
-         • npx hosts-tool toggle my-project works out of the box
-         • No learning curve
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-2024_edition-orange.svg)](https://www.rust-lang.org)
 
-GUI  →  Tauri + Rust backend
-         • File I/O is exactly the "3-week Rust" scenario we discussed
-         • No sidecar needed — hosts file manipulation is simple fs ops
-         • Ships as a proper .dmg / .exe / .deb
-         • System tray icon = one click toggle without opening full UI
+A suite of tools for managing your system hosts file without ever manually editing it.
+
+---
+
+## Ecosystem
+
+| Crate | Description | Status | Link |
+|---|---|---|---|
+| `hostcraft-core` | Shared parsing, data modelling and file I/O library | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-core) |
+| `hostcraft-cli` | Terminal interface | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-cli) |
+| `hostcraft-gui` | Desktop GUI (Tauri) | 🚧 Planned | — |
+
+---
+
+## Quick Start
+
+Install the CLI with a single command:
+
+```sh
+cargo install hostcraft-cli
 ```
 
-```
-Core operations
-├── add     hostname ip           # Add new entry
-├── remove  hostname              # Remove entry
-├── toggle  hostname              # Comment/uncomment  ← your main pain point
-├── list                          # Show all entries with status
-└── group   [name]                # Group related entries together
+Then use it from anywhere in your terminal:
 
-Power features (what makes it open source worthy)
-├── Profiles   # "work", "personal", "project-x" — switch entire sets
-├── Backup     # Auto-backup before every write operation
-├── Dry run    # Preview changes before applying
-└── sudo handling  # Graceful elevation prompts, not silent failures
+```sh
+hostcraft list                              # view all entries
+sudo hostcraft add myapp.local 127.0.0.1   # add an entry
+sudo hostcraft toggle myapp.local          # enable / disable
+sudo hostcraft remove myapp.local          # remove permanently
 ```
+
+> **Windows users:** run your terminal as Administrator instead of using `sudo`.
+
+---
+
+## Repository Structure
+
+```
+hostcraft/
+├── core/        # hostcraft-core — shared library consumed by all tools
+└── cli/         # hostcraft-cli — the terminal interface
+```
+
+Each crate has its own README with full documentation:
+
+- [`core/README.md`](core/README.md) — API reference, usage examples, and integration guide
+- [`cli/README.md`](cli/README.md) — commands, options, permissions, and development guide
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome on [GitHub](https://github.com/Zaberahmed/hostcraft).
+If you find the project useful, leaving a ⭐ helps others discover it.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
