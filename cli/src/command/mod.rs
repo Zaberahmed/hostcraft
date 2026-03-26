@@ -52,9 +52,16 @@ pub enum Command {
         /// The hostname to toggle (partial match supported)
         name: String,
     },
+
+    /// Check for a newer version and update if one is available
+    Update,
 }
 
 pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
+    if matches!(cli.command, Command::Update) {
+        return crate::update::handle_update();
+    }
+
     let lines = file::read_file(&cli.file)
         .map_err(|e| format!("Failed to read hosts file '{}': {}", cli.file, e))?;
 
@@ -100,6 +107,8 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
             print_success(&format!("Toggled '{}'", name));
             print_entries(&entries);
         }
+
+        Command::Update => unreachable!("handled above"),
     }
 
     Ok(())
