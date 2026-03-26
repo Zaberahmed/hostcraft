@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-2024_edition-orange.svg)](https://www.rust-lang.org)
 
-The shared foundation powering the hostcraft ecosystem — a suite of tools for managing your system's `/etc/hosts` (unix based) or `\etc\hosts` (windows) file. This crate contains all parsing, data modelling, and file I/O logic, deliberately free of any presentation or platform concerns so it can be consumed equally by a CLI, a desktop GUI, or any other Rust application.
+The shared foundation powering the hostcraft ecosystem — a suite of tools for managing your system hosts file (`/etc/hosts` on macOS/Linux, `C:\Windows\System32\drivers\etc\hosts` on Windows). This crate contains all parsing, data modelling, and file I/O logic, deliberately free of any presentation or platform concerns so it can be consumed equally by a CLI, a desktop GUI, or any other Rust application.
 
 ---
 
@@ -13,7 +13,7 @@ The shared foundation powering the hostcraft ecosystem — a suite of tools for 
 | Crate | Description | Status |
 |---|---|---|
 | `hostcraft-core` | Shared library (this crate) | ✅ Published |
-| `hostcraft-cli` | Terminal interface | ✅ Active |
+| `hostcraft-cli` | Terminal interface | ✅ Published |
 | `hostcraft-gui` | Desktop GUI (Tauri) | 🚧 Planned |
 
 Every consumer in the ecosystem depends on this crate for its data types and business logic. Presentation — colours, layout, widgets — is always the consumer's responsibility.
@@ -34,7 +34,7 @@ Every consumer in the ecosystem depends on this crate for its data types and bus
 
 ```toml
 [dependencies]
-hostcraft-core = "0.1.2"
+hostcraft-core = "0.1.6"
 ```
 
 ---
@@ -216,7 +216,7 @@ pub enum HostError {
 | Function                              | Signature                                                                 | Description                                               |
 |---------------------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------|
 | `parse_contents`                      | `(impl Iterator<Item = io::Result<String>>) -> Vec<HostEntry>`           | Parses a line iterator into a list of entries             |
-| `add_entry`                           | `(&mut Vec<HostEntry>, IpAddr, String) -> Result<(), HostError>`         | Adds an active entry; rejects duplicates                  |
+| `add_entry`                           | `(&mut Vec<HostEntry>, IpAddr, impl Into<String>) -> Result<(), HostError>` | Adds an active entry; rejects duplicates              |
 | `remove_entry`                        | `(&mut Vec<HostEntry>, &str) -> Result<(), HostError>`                   | Removes all entries matching the partial name             |
 | `toggle_entry`                        | `(&mut Vec<HostEntry>, &str) -> Result<(), HostError>`                   | Toggles all entries matching the partial name             |
 
