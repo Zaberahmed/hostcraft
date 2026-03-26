@@ -13,7 +13,7 @@ A fast, cross-platform CLI for managing your system hosts file — add, remove, 
 | Crate | Description | Status |
 |---|---|---|
 | `hostcraft-core` | Shared library | ✅ Published |
-| `hostcraft-cli` | Terminal interface (this crate) | ✅ Active |
+| `hostcraft-cli` | Terminal interface (this crate) | ✅ Published |
 | `hostcraft-gui` | Desktop GUI (Tauri) | 🚧 Planned |
 
 ---
