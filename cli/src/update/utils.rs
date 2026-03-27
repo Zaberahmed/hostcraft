@@ -25,10 +25,11 @@ pub(super) fn api_url() -> String {
 
 pub(super) fn fetch_from_crates_io(url: &str) -> Option<CratesIoResponse> {
     ureq::get(url)
-        .set("User-Agent", &format!("{}/{}", CRATE_NAME, CURRENT_VERSION))
+        .header("User-Agent", &format!("{}/{}", CRATE_NAME, CURRENT_VERSION))
         .call()
         .ok()?
-        .into_json()
+        .body_mut()
+        .read_json()
         .ok()
 }
 

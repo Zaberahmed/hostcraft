@@ -19,7 +19,7 @@ hostcraft-core = "0.1.7"
 clap = { version = "4", features = ["derive"] }
 anstyle = "1"
 anstream = "1"
-ureq = { version = "2", features = ["json"] }
+ureq = { version = "3", features = ["json"] }
 serde = { version = "1", features = ["derive"] }
 semver = "1"
-directories = "5"
+directories = "6"
