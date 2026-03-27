@@ -1,8 +1,8 @@
 import "./App.css";
 import { Routes, Route, Navigate, HashRouter } from "react-router-dom";
-import Layout from "./components/layout";
-import HostEntries from "./pages/host-entries";
-import Settings from "./pages/settings";
+import Layout from "@/components/layout";
+import HostEntries from "@/pages/host-entries";
+import Settings from "@/pages/settings";
 
 function App() {
   return (

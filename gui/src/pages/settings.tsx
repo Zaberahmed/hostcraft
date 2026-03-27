@@ -7,6 +7,8 @@ import {
   SecuredNetworkIcon,
   Add01Icon,
 } from "@hugeicons/core-free-icons";
+import { useState } from "react";
+import { Toggle } from "@/components/ui/toggle";
 
 interface SettingRowProps {
   label: string;
@@ -59,28 +61,6 @@ function SettingSection({ icon, title, children }: SettingSectionProps) {
     </div>
   );
 }
-
-function Toggle({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="relative inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        className="sr-only peer"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <div className="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary" />
-    </label>
-  );
-}
-
-import { useState } from "react";
 
 export default function Settings() {
   const [notifications, setNotifications] = useState(true);
@@ -200,7 +180,7 @@ export default function Settings() {
         <button className="px-5 py-2.5 text-sm font-semibold text-primary rounded-lg hover:bg-primary-container/40 transition-colors">
           Reset to defaults
         </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dim text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl transition-all duration-300">
+        <button className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-primary to-primary-dim text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl transition-all duration-300">
           <HugeiconsIcon icon={Add01Icon} size={15} strokeWidth={2.5} />
           Save changes
         </button>
@@ -208,7 +188,9 @@ export default function Settings() {
 
       {/* Footer */}
       <footer className="mt-12 pt-8 border-t border-outline-variant/10 flex flex-col md:flex-row justify-between items-center gap-4 text-outline-variant text-xs">
-        <p>© 2024 HostCraft Precision Curator. All technical rights reserved.</p>
+        <p>
+          © 2024 HostCraft Precision Curator. All technical rights reserved.
+        </p>
         <div className="flex gap-6">
           <a href="#" className="hover:text-primary transition-colors">
             Privacy Policy

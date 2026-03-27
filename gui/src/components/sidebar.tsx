@@ -20,7 +20,7 @@ const navItems = [
   },
 ];
 
-export function AppSidebar() {
+export function Sidebar() {
   const location = useLocation();
 
   return (
@@ -29,7 +29,7 @@ export function AppSidebar() {
       <div className="flex flex-col gap-4 px-6 pt-6 pb-8">
         <div className="flex items-center gap-3">
           {/* Gradient icon badge */}
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dim flex items-center justify-center shadow-sm shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary to-primary-dim flex items-center justify-center shadow-sm shrink-0">
             <HugeiconsIcon
               icon={ServerStack01Icon}
               size={20}
@@ -94,7 +94,7 @@ export function AppSidebar() {
       {/* ── Footer ────────────────────────────────────────────── */}
       <div className="flex flex-col gap-2 px-4 pb-6 mt-auto">
         {/* Add New Entry — gradient CTA */}
-        <button className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-primary to-primary-dim text-on-primary rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:brightness-105 transition-all duration-300 font-semibold text-sm">
+        <button className="w-full flex items-center justify-center gap-2 py-3 bg-linear-to-r from-primary to-primary-dim text-on-primary rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:brightness-105 transition-all duration-300 font-semibold text-sm">
           <HugeiconsIcon icon={Add01Icon} size={16} strokeWidth={2.5} />
           Add New Entry
         </button>
