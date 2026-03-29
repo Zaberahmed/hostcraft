@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/sidebar";
 import { Footer } from "@/components/footer";
+import { EntryModal } from "@/components/entry-modal";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </main>
         <Footer />
       </div>
+      <EntryModal />
     </div>
   );
 }

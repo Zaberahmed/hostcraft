@@ -27,7 +27,7 @@ export function SidebarHeader() {
               {APP_TITLE}
             </h1>
             {version && (
-              <span className={cn(badge(), isBeta && "uppercase")}>
+              <span className={cn(badge({ isBeta }))}>
                 {isBeta ? "Beta" : `v${version}`}
               </span>
             )}

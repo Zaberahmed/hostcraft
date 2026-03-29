@@ -18,6 +18,9 @@ export const badge = tv({
     fontFamily: {
       default: "font-label",
     },
+    isBeta: {
+      true: "uppercase",
+    },
   },
   defaultVariants: {
     color: "default",

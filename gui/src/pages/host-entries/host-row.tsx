@@ -1,23 +1,35 @@
+import { Icon } from "@/components/ui/icon";
 import { Toggle } from "@/components/ui/toggle";
+import { HostEntry } from "@/entities/host.model";
 import { cn } from "@/lib/utils";
 import { Copy01Icon, Delete01Icon, EditIcon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/ui/icon";
-import { AccentColor, HostEntry } from "./host.model";
+import { confirm } from "@tauri-apps/plugin-dialog";
 
 interface HostRowProps {
   entry: HostEntry;
   onToggle: (id: string, value: boolean) => void;
   onDelete: (id: string) => void;
+  onEdit: (entry: HostEntry) => void;
+  onDuplicate: (entry: HostEntry) => void;
 }
 
-const accentClasses: Record<AccentColor, string> = {
-  primary: "bg-primary",
-  tertiary: "bg-tertiary",
-  secondary: "bg-secondary",
-  "outline-variant": "bg-outline-variant",
-};
-export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
+export function HostRow({
+  entry,
+  onToggle,
+  onDelete,
+  onDuplicate,
+  onEdit,
+}: HostRowProps) {
   const isDisabled = !entry.enabled;
+
+  const onDeleteIconClick = async () => {
+    const confirmation = await confirm(
+      "Are you sure you want to delete this entry?",
+      { kind: "warning", okLabel: "Confirm" },
+    );
+    if (!confirmation) return;
+    onDelete(entry.id);
+  };
 
   return (
     <div
@@ -32,7 +44,7 @@ export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
         <div
           className={cn(
             "w-2.5 h-10 rounded-full shrink-0",
-            accentClasses[entry.accent],
+            `bg-${entry.accent}`,
           )}
         />
 
@@ -72,7 +84,7 @@ export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
 
         {/* Edit */}
         <button
-          onClick={() => console.log("Edit")}
+          onClick={() => onEdit(entry)}
           className="p-2 rounded-lg text-outline-variant hover:text-primary hover:bg-primary-container/20 transition-all active:scale-90"
           aria-label={`Edit ${entry.hostname}`}
         >
@@ -81,7 +93,7 @@ export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
 
         {/* Duplicate */}
         <button
-          onClick={() => console.log("Duplicate")}
+          onClick={() => onDuplicate(entry)}
           className="p-2 rounded-lg text-outline-variant hover:text-primary hover:bg-primary-container/20 transition-all active:scale-90"
           aria-label={`Duplicate ${entry.hostname}`}
         >
@@ -90,7 +102,7 @@ export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
 
         {/* Delete */}
         <button
-          onClick={() => onDelete(entry.id)}
+          onClick={onDeleteIconClick}
           className="p-2 rounded-lg text-outline-variant hover:text-error hover:bg-error-container/20 transition-all active:scale-90"
           aria-label={`Delete ${entry.hostname}`}
         >
