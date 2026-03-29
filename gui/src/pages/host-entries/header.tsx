@@ -1,11 +1,4 @@
-import { Toggle } from "@/components/ui/toggle";
-import { useThemeContext } from "@/providers/theme.provider";
-import { Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
-import { Icon } from "@/components/ui/icon";
-
 export function Header() {
-  const { theme, toggleTheme } = useThemeContext();
-
   return (
     <div className="flex justify-between items-center mb-10">
       {/* File status chip */}
@@ -17,17 +10,6 @@ export function Header() {
           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
           <span className="text-sm font-bold text-on-surface">Operational</span>
         </div>
-      </div>
-
-      {/* Theme toggle */}
-      <div className="flex items-center gap-2 pr-6">
-        <Toggle checked={theme === "dark"} onChange={toggleTheme} />
-        <Icon
-          icon={Sun01Icon}
-          altIcon={Moon02Icon}
-          size={18}
-          showAlt={theme === "dark"}
-        />
       </div>
     </div>
   );

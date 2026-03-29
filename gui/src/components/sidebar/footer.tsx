@@ -23,7 +23,9 @@ export function Footer() {
             size={18}
             showAlt={theme === "dark"}
           />
-          <span>{theme === "dark" ? "Dark" : "Light"} mode</span>
+          <span className="text-on-surface font-medium text-sm">
+            {theme === "dark" ? "Dark" : "Light"} mode
+          </span>
         </div>
       </div>
     </div>
