@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "gui",
-        "width": 800,
-        "height": 600
+        "title": "Hostcraft",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 1000,
+        "minHeight": 600
       }
     ],
     "security": {
