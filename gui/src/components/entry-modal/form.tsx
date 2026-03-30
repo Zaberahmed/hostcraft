@@ -1,8 +1,8 @@
-import { cn } from "@/lib/utils";
-import { Field } from "@/components/ui/field";
 import { useEffect, useState } from "react";
-import { isValidIPv4, isValidHostname } from "@/utils/entries";
+import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { useEntries } from "@/providers/entries.provider";
+import { isValidHostname, isValidIPv4 } from "@/utils/entries";
 
 export function EntryForm() {
   const { modal, closeModal, addEntry, editEntry } = useEntries();
@@ -88,31 +88,15 @@ export function EntryForm() {
       </div>
 
       <div className="flex items-center justify-end gap-2 px-6 pb-6 pt-1">
-        <button
-          type="button"
-          onClick={closeModal}
-          className={cn(
-            "px-4 py-2 rounded-lg text-sm font-semibold",
-            "text-primary hover:bg-primary-container/30",
-            "transition-colors duration-150",
-          )}
-        >
+        {/* Cancel */}
+        <Button type="button" variant="subtle" onClick={closeModal}>
           Cancel
-        </button>
+        </Button>
 
-        <button
-          type="submit"
-          className={cn(
-            "flex items-center gap-2 px-5 py-2 rounded-lg",
-            "text-sm font-semibold text-on-primary",
-            "bg-linear-to-r from-primary to-primary-dim",
-            "shadow-md shadow-primary/20",
-            "hover:brightness-105 active:scale-[0.98]",
-            "transition-all duration-150",
-          )}
-        >
+        {/* Save / Add */}
+        <Button type="submit" variant="primary" size="md">
           {isEdit ? "Save Changes" : "Add Entry"}
-        </button>
+        </Button>
       </div>
     </form>
   );

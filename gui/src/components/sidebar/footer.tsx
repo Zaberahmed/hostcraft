@@ -3,6 +3,7 @@ import { useThemeContext } from "@/providers/theme.provider";
 import { useEntries } from "@/providers/entries.provider";
 import { Add01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
 
 export function Footer() {
   const { theme, toggleTheme } = useThemeContext();
@@ -10,13 +11,11 @@ export function Footer() {
 
   return (
     <div className="px-4 pb-6 flex flex-col gap-6">
-      <button
-        onClick={openAddModal}
-        className="w-full flex items-center justify-center gap-2 py-3 bg-linear-to-r from-primary to-primary-dim text-on-primary rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:brightness-105 transition-all duration-300 font-semibold text-sm"
-      >
+      {/* Add New Entry */}
+      <Button variant="primary" size="full" onClick={openAddModal}>
         <Icon icon={Add01Icon} strokeWidth={2.5} />
         Add New Entry
-      </button>
+      </Button>
 
       <div className="border-t border-outline-variant/10">
         {/* Theme toggle */}

@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Toggle } from "@/components/ui/toggle";
 import type { AccentColor, HostEntry } from "@/entities/host.model";
@@ -90,31 +91,32 @@ export function HostRow({
         </div>
 
         {/* Edit */}
-        <button
+        <Button
+          size="icon"
           onClick={() => onEdit(entry)}
-          className="p-2 rounded-lg text-outline-variant hover:text-primary hover:bg-primary-container/20 transition-all active:scale-90"
           aria-label={`Edit ${entry.hostname}`}
         >
           <Icon icon={EditIcon} size={20} />
-        </button>
+        </Button>
 
         {/* Duplicate */}
-        <button
+        <Button
+          size="icon"
           onClick={() => onDuplicate(entry)}
-          className="p-2 rounded-lg text-outline-variant hover:text-primary hover:bg-primary-container/20 transition-all active:scale-90"
           aria-label={`Duplicate ${entry.hostname}`}
         >
           <Icon icon={Copy01Icon} size={20} />
-        </button>
+        </Button>
 
         {/* Delete */}
-        <button
+        <Button
+          size="icon"
+          variant="danger"
           onClick={onDeleteIconClick}
-          className="p-2 rounded-lg text-outline-variant hover:text-error hover:bg-error-container/20 transition-all active:scale-90"
           aria-label={`Delete ${entry.hostname}`}
         >
-          <Icon icon={Delete01Icon} size={20} color="red" />
-        </button>
+          <Icon icon={Delete01Icon} size={20} />
+        </Button>
       </div>
     </div>
   );
