@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import { isValidIPv4, isValidHostname } from "@/utils/entries";
 import { useEntries } from "@/providers/entries.provider";
 
-export function EntryForm({
-  inputRef,
-}: {
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}) {
+export function EntryForm() {
   const { modal, closeModal, addEntry, editEntry } = useEntries();
   const [ip, setIp] = useState("");
   const [hostname, setHostname] = useState("");
@@ -77,8 +73,7 @@ export function EntryForm({
           onChange={handleIpChange}
           placeholder="192.168.1.1"
           error={errors.ip}
-          inputRef={inputRef}
-          fontClass="font-label"
+          fontClass="fontLabel"
         />
 
         <Field
@@ -88,7 +83,7 @@ export function EntryForm({
           onChange={handleHostnameChange}
           placeholder="dev.local"
           error={errors.hostname}
-          fontClass="font-body"
+          fontClass="fontBody"
         />
       </div>
 

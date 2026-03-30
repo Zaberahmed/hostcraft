@@ -1,9 +1,16 @@
 import { Icon } from "@/components/ui/icon";
 import { Toggle } from "@/components/ui/toggle";
-import { HostEntry } from "@/entities/host.model";
+import type { AccentColor, HostEntry } from "@/entities/host.model";
 import { cn } from "@/lib/utils";
 import { Copy01Icon, Delete01Icon, EditIcon } from "@hugeicons/core-free-icons";
 import { confirm } from "@tauri-apps/plugin-dialog";
+
+const accentClasses: Record<AccentColor, string> = {
+  primary: "bg-primary",
+  tertiary: "bg-tertiary",
+  secondary: "bg-secondary",
+  "outline-variant": "bg-outline-variant",
+};
 
 interface HostRowProps {
   entry: HostEntry;
@@ -44,7 +51,7 @@ export function HostRow({
         <div
           className={cn(
             "w-2.5 h-10 rounded-full shrink-0",
-            `bg-${entry.accent}`,
+            accentClasses[entry.accent],
           )}
         />
 

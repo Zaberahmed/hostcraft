@@ -1,5 +1,5 @@
 import { useEntries } from "@/providers/entries.provider";
-import { badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { activeEntriesCount } from "@/utils/entries";
 import { EmptyEntries } from "./empty-entries";
 import { Header } from "./header";
@@ -15,12 +15,10 @@ export default function HostEntries() {
       <Header />
 
       <div className="flex mb-4 items-center gap-2 font-headline text-lg font-bold text-on-surface">
-        <span className={badge({ color: "tertiary" })}>
-          {entries.length} entries
-        </span>
-        <span className={badge({ color: "secondary" })}>
+        <Badge variants={{ color: "tertiary" }}>{entries.length} entries</Badge>
+        <Badge variants={{ color: "secondary" }}>
           {activeEntriesCount(entries)} active
-        </span>
+        </Badge>
       </div>
 
       <HostFilters />

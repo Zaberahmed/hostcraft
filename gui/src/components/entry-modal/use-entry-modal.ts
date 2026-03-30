@@ -1,5 +1,5 @@
 import { useEntries } from "@/providers/entries.provider";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useEntryModal() {
   const { modal, closeModal } = useEntries();
@@ -22,15 +22,6 @@ export function useEntryModal() {
     }
   }, [isOpen]);
 
-  const ipRef = useRef<HTMLInputElement>(null);
-
-  // Auto-focus the IP field whenever the modal opens
-  useEffect(() => {
-    if (!isOpen) return;
-    const raf = requestAnimationFrame(() => ipRef.current?.focus());
-    return () => cancelAnimationFrame(raf);
-  }, [isOpen]);
-
   // Escape key closes the modal
   useEffect(() => {
     if (!isOpen) return;
@@ -42,7 +33,6 @@ export function useEntryModal() {
   }, [isOpen, closeModal]);
 
   return {
-    ipRef,
     isEdit,
     isMounted,
     isVisible,

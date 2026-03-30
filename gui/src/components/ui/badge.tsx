@@ -1,6 +1,7 @@
-import { tv } from "tailwind-variants";
+import { ReactNode } from "react";
+import { tv, VariantProps } from "tailwind-variants";
 
-export const badge = tv({
+const badge = tv({
   base: "px-2 py-0.5 rounded-md",
   variants: {
     color: {
@@ -29,3 +30,13 @@ export const badge = tv({
     fontFamily: "default",
   },
 });
+
+export const Badge = ({
+  children,
+  variants,
+}: {
+  children: ReactNode;
+  variants: VariantProps<typeof badge>;
+}) => {
+  return <span className={badge(variants)}>{children}</span>;
+};

@@ -1,14 +1,52 @@
 import { cn } from "@/lib/utils";
+import { tv } from "tailwind-variants";
+
+const field = tv({
+  slots: {
+    base: "flex flex-col gap-1.5",
+    labelClassName:
+      "text-[10px] uppercase font-bold tracking-wider text-outline-variant font-label select-none",
+    input: cn(
+      "w-full px-3.5 py-2.5 rounded-lg text-sm text-on-surface",
+      "border transition-all duration-150 outline-none",
+      "placeholder:text-outline-variant/50",
+    ),
+    errorContainer: "overflow-hidden transition-all duration-200",
+    errorClassName: "text-xs text-error-dim font-label pt-0.5",
+  },
+  variants: {
+    hasError: {
+      true: {
+        input: cn(
+          "bg-error-container/10 border-error/40",
+          "focus:border-error focus:ring-2 focus:ring-error/15",
+        ),
+        errorContainer: "max-h-8 opacity-100",
+      },
+      false: {
+        input: cn(
+          "bg-surface-container-low border-outline-variant/15",
+          "focus:bg-surface-container-lowest focus:border-primary",
+          "focus:ring-2 focus:ring-primary/15",
+        ),
+        errorContainer: "max-h-0 opacity-0",
+      },
+    },
+    fontClass: {
+      fontBody: "font-body",
+      fontLabel: "font-label",
+    },
+  },
+});
 
 interface FieldProps {
-  id: string;
+  id: "entry-ip" | "entry-hostname";
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
+  fontClass: "fontBody" | "fontLabel";
   error?: string;
-  fontClass?: string;
-  inputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export function Field({
@@ -18,22 +56,25 @@ export function Field({
   onChange,
   placeholder,
   error,
-  fontClass = "font-body",
-  inputRef,
+  fontClass,
 }: FieldProps) {
   const hasError = Boolean(error);
 
+  const { base, labelClassName, input, errorContainer, errorClassName } = field(
+    {
+      hasError,
+      fontClass,
+    },
+  );
+
   return (
-    <div className="flex flex-col gap-1.5">
-      <label
-        htmlFor={id}
-        className="text-[10px] uppercase font-bold tracking-wider text-outline-variant font-label select-none"
-      >
+    <div className={base()}>
+      <label htmlFor={id} className={labelClassName()}>
         {label}
       </label>
 
       <input
-        ref={inputRef}
+        autoFocus={id === "entry-ip"}
         id={id}
         type="text"
         value={value}
@@ -43,36 +84,12 @@ export function Field({
         spellCheck={false}
         aria-describedby={hasError ? `${id}-error` : undefined}
         aria-invalid={hasError}
-        className={cn(
-          "w-full px-3.5 py-2.5 rounded-lg text-sm text-on-surface",
-          "border transition-all duration-150 outline-none",
-          "placeholder:text-outline-variant/50",
-          fontClass,
-          hasError
-            ? [
-                "bg-error-container/10 border-error/40",
-                "focus:border-error focus:ring-2 focus:ring-error/15",
-              ]
-            : [
-                "bg-surface-container-low border-outline-variant/15",
-                "focus:bg-surface-container-lowest focus:border-primary",
-                "focus:ring-2 focus:ring-primary/15",
-              ],
-        )}
+        className={input()}
       />
 
-      <div
-        className={cn(
-          "overflow-hidden transition-all duration-200",
-          hasError ? "max-h-8 opacity-100" : "max-h-0 opacity-0",
-        )}
-      >
+      <div className={errorContainer()}>
         {error && (
-          <p
-            id={`${id}-error`}
-            role="alert"
-            className="text-xs text-error font-label pt-0.5"
-          >
+          <p id={`${id}-error`} role="alert" className={errorClassName()}>
             {error}
           </p>
         )}

@@ -3,7 +3,7 @@ import { EntryForm } from "./form";
 import { useEntryModal } from "./use-entry-modal";
 
 export function EntryModal() {
-  const { ipRef, isEdit, isMounted, isVisible, closeModal } = useEntryModal();
+  const { isEdit, isMounted, isVisible, closeModal } = useEntryModal();
 
   if (!isMounted) return null;
 
@@ -13,7 +13,7 @@ export function EntryModal() {
       onClose={closeModal}
       title={isEdit ? "Edit Host Entry" : "Add Host Entry"}
     >
-      <EntryForm inputRef={ipRef} />
+      <EntryForm />
     </Modal>
   );
 }
