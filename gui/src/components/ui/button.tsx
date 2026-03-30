@@ -9,8 +9,7 @@ export const button = tv({
       primary: [
         "text-on-primary rounded-xl",
         "bg-linear-to-r from-primary to-primary-dim",
-        "shadow-md shadow-primary/20",
-        "hover:brightness-105 hover:shadow-xl",
+        "hover:brightness-105",
         "active:scale-[0.98]",
       ],
       ghost: [
@@ -31,9 +30,16 @@ export const button = tv({
     },
     size: {
       icon: "p-2",
-      sm: "px-4 py-2 text-sm gap-2",
+      sm: "px-5 py-2.5 text-sm gap-2",
       md: "px-5 py-2 text-sm gap-2",
       full: "w-full py-3 text-sm gap-2",
+    },
+    shadow: {
+      md: "shadow-md shadow-primary/20 hover:shadow-xl",
+      lg: "shadow-lg shadow-primary/20 hover:shadow-xl",
+    },
+    duration: {
+      lg: "duration-300",
     },
   },
   defaultVariants: {
@@ -47,10 +53,10 @@ interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariants {}
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, size, className, ...props }, ref) => (
+  ({ variant, size, shadow, duration, className, ...props }, ref) => (
     <button
       ref={ref}
-      className={cn(button({ variant, size }), className)}
+      className={cn(button({ variant, size, shadow, duration }), className)}
       {...props}
     />
   ),

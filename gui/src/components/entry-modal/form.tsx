@@ -94,7 +94,7 @@ export function EntryForm() {
         </Button>
 
         {/* Save / Add */}
-        <Button type="submit" variant="primary" size="md">
+        <Button type="submit" variant="primary" size="md" shadow="md">
           {isEdit ? "Save Changes" : "Add Entry"}
         </Button>
       </div>

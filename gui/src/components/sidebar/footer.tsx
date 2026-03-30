@@ -12,7 +12,7 @@ export function Footer() {
   return (
     <div className="px-4 pb-6 flex flex-col gap-6">
       {/* Add New Entry */}
-      <Button variant="primary" size="full" onClick={openAddModal}>
+      <Button variant="primary" size="full" shadow="md" onClick={openAddModal}>
         <Icon icon={Add01Icon} strokeWidth={2.5} />
         Add New Entry
       </Button>
