@@ -1624,6 +1624,7 @@ name = "hostcraft-core"
 version = "0.1.7"
 dependencies = [
  "regex",
+ "serde",
 ]
 
 [[package]]
@@ -1639,6 +1640,7 @@ dependencies = [
 name = "hostcraft-gui"
 version = "0.1.0"
 dependencies = [
+ "hostcraft-core 0.1.7",
  "serde",
  "serde_json",
  "tauri",

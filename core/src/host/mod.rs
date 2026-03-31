@@ -1,8 +1,9 @@
 mod utils;
 use crate::host::utils::{is_duplicate_entry, parse_line};
+use serde::Serialize;
 use std::{fmt, io, net::IpAddr};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum HostStatus {
     Active,
     Inactive,
@@ -17,7 +18,7 @@ impl fmt::Display for HostStatus {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct HostEntry {
     pub status: HostStatus,
     pub ip: IpAddr,
