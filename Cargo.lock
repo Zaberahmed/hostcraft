@@ -1613,18 +1613,10 @@ dependencies = [
  "anstyle",
  "clap",
  "directories",
- "hostcraft-core 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hostcraft-core 0.1.7",
  "semver",
  "serde",
  "ureq",
-]
-
-[[package]]
-name = "hostcraft-core"
-version = "0.1.7"
-dependencies = [
- "regex",
- "serde",
 ]
 
 [[package]]
@@ -1637,10 +1629,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hostcraft-core"
+version = "0.1.8"
+dependencies = [
+ "regex",
+ "serde",
+]
+
+[[package]]
 name = "hostcraft-gui"
 version = "0.1.0"
 dependencies = [
- "hostcraft-core 0.1.7",
+ "hostcraft-core 0.1.8",
  "serde",
  "serde_json",
  "tauri",

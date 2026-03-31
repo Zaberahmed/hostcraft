@@ -1,6 +1,6 @@
 [package]
 name = "hostcraft-core"
-version = "0.1.7"
+version = "0.1.8"
 edition = "2024"
 authors = ["Sk. Zaber Ahmed"]
 description = "Core library for the hostcraft ecosystem — parsing, manipulation and file I/O for system hosts"
