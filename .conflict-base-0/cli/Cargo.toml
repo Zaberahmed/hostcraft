@@ -1,0 +1,22 @@
+[package]
+name = "hostcraft-cli"
+version = "1.0.1"
+edition = "2024"
+authors = ["Sk. Zaber Ahmed"]
+description = "CLI for managing your system hosts file"
+license = "MIT"
+repository = "https://github.com/Zaberahmed/hostcraft"
+readme = "README.md"
+keywords = ["hosts", "networking", "dns", "cli", "system"]
+categories = ["command-line-utilities", "network-programming"]
+features = ["Add host entry", "Remove host entry", "Toggle host entry", "List host entries"]
+
+[[bin]]
+name = "hostcraft"
+path = "src/main.rs"
+
+[dependencies]
+hostcraft-core = "0.1.6"
+clap = { version = "4", features = ["derive"] }
+anstyle = "1"
+anstream = "1"
