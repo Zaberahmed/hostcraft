@@ -7,8 +7,7 @@ import { HostFilters } from "./host-filters";
 import { HostRow } from "./host-row";
 
 export default function HostEntries() {
-  const { entries, toggleEntry, deleteEntry, openEditModal, duplicateEntry } =
-    useEntries();
+  const { entries, toggleEntry, deleteEntry, openEditModal } = useEntries();
 
   return (
     <div className="px-8 py-6 max-w-6xl mx-auto">
@@ -34,7 +33,6 @@ export default function HostEntries() {
               onToggle={toggleEntry}
               onDelete={deleteEntry}
               onEdit={openEditModal}
-              onDuplicate={duplicateEntry}
             />
           ))
         )}

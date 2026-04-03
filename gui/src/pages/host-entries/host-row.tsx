@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { Toggle } from "@/components/ui/toggle";
 import type { AccentColor, HostEntry } from "@/entities/host.model";
 import { cn } from "@/lib/utils";
-import { Copy01Icon, Delete01Icon, EditIcon } from "@hugeicons/core-free-icons";
+import { Delete01Icon, EditIcon } from "@hugeicons/core-free-icons";
 import { confirm } from "@tauri-apps/plugin-dialog";
 
 const accentClasses: Record<AccentColor, string> = {
@@ -15,19 +15,12 @@ const accentClasses: Record<AccentColor, string> = {
 
 interface HostRowProps {
   entry: HostEntry;
-  onToggle: (id: string, value: boolean) => void;
-  onDelete: (id: string) => void;
+  onToggle: (name: string) => void;
+  onDelete: (name: string) => void;
   onEdit: (entry: HostEntry) => void;
-  onDuplicate: (entry: HostEntry) => void;
 }
 
-export function HostRow({
-  entry,
-  onToggle,
-  onDelete,
-  onDuplicate,
-  onEdit,
-}: HostRowProps) {
+export function HostRow({ entry, onToggle, onDelete, onEdit }: HostRowProps) {
   const isDisabled = !entry.enabled;
 
   const onDeleteIconClick = async () => {
@@ -36,7 +29,7 @@ export function HostRow({
       { kind: "warning", okLabel: "Confirm" },
     );
     if (!confirmation) return;
-    onDelete(entry.id);
+    onDelete(entry.hostname);
   };
 
   return (
@@ -86,7 +79,7 @@ export function HostRow({
           </span>
           <Toggle
             checked={entry.enabled}
-            onChange={(v) => onToggle(entry.id, v)}
+            onChange={() => onToggle(entry.hostname)}
           />
         </div>
 
@@ -97,15 +90,6 @@ export function HostRow({
           aria-label={`Edit ${entry.hostname}`}
         >
           <Icon icon={EditIcon} size={20} />
-        </Button>
-
-        {/* Duplicate */}
-        <Button
-          size="icon"
-          onClick={() => onDuplicate(entry)}
-          aria-label={`Duplicate ${entry.hostname}`}
-        >
-          <Icon icon={Copy01Icon} size={20} />
         </Button>
 
         {/* Delete */}

@@ -4,9 +4,14 @@ export type AccentColor =
   | "secondary"
   | "outline-variant";
 
-export interface HostEntry {
-  id: string;
+export interface BaseHostEntry {
   ip: string;
+  name: string;
+  status: "Active" | "Inactive";
+}
+
+export interface HostEntry extends Pick<BaseHostEntry, "ip"> {
+  id: string;
   hostname: string;
   enabled: boolean;
   accent: AccentColor;
