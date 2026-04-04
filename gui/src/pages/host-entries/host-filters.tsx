@@ -4,6 +4,7 @@ import {
   Sorting01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
+import { Button } from "@/components/ui/button";
 
 export function HostFilters() {
   return (
@@ -29,12 +30,14 @@ export function HostFilters() {
       </div>
 
       <div className="flex gap-2">
-        <button className="p-2 bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
+        {/* Filter */}
+        <Button size="icon" variant="surface">
           <Icon icon={FilterIcon} size={18} />
-        </button>
-        <button className="p-2 bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors text-on-surface-variant">
+        </Button>
+        {/* Sort */}
+        <Button size="icon" variant="surface">
           <Icon icon={Sorting01Icon} size={18} />
-        </button>
+        </Button>
       </div>
     </div>
   );

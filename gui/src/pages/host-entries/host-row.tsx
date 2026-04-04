@@ -1,14 +1,10 @@
-import { Toggle } from "@/components/ui/toggle";
-import { cn } from "@/lib/utils";
-import { Copy01Icon, Delete01Icon, EditIcon } from "@hugeicons/core-free-icons";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { AccentColor, HostEntry } from "./host.model";
-
-interface HostRowProps {
-  entry: HostEntry;
-  onToggle: (id: string, value: boolean) => void;
-  onDelete: (id: string) => void;
-}
+import { Toggle } from "@/components/ui/toggle";
+import type { AccentColor, HostEntry } from "@/entities/host.model";
+import { cn } from "@/lib/utils";
+import { Delete01Icon, EditIcon } from "@hugeicons/core-free-icons";
+import { confirm } from "@tauri-apps/plugin-dialog";
 
 const accentClasses: Record<AccentColor, string> = {
   primary: "bg-primary",
@@ -16,8 +12,25 @@ const accentClasses: Record<AccentColor, string> = {
   secondary: "bg-secondary",
   "outline-variant": "bg-outline-variant",
 };
-export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
+
+interface HostRowProps {
+  entry: HostEntry;
+  onToggle: (name: string) => void;
+  onDelete: (name: string) => void;
+  onEdit: (entry: HostEntry) => void;
+}
+
+export function HostRow({ entry, onToggle, onDelete, onEdit }: HostRowProps) {
   const isDisabled = !entry.enabled;
+
+  const onDeleteIconClick = async () => {
+    const confirmation = await confirm(
+      "Are you sure you want to delete this entry?",
+      { kind: "warning", okLabel: "Confirm" },
+    );
+    if (!confirmation) return;
+    onDelete(entry.hostname);
+  };
 
   return (
     <div
@@ -66,36 +79,28 @@ export function HostRow({ entry, onToggle, onDelete }: HostRowProps) {
           </span>
           <Toggle
             checked={entry.enabled}
-            onChange={(v) => onToggle(entry.id, v)}
+            onChange={() => onToggle(entry.hostname)}
           />
         </div>
 
         {/* Edit */}
-        <button
-          onClick={() => console.log("Edit")}
-          className="p-2 rounded-lg text-outline-variant hover:text-primary hover:bg-primary-container/20 transition-all active:scale-90"
+        <Button
+          size="icon"
+          onClick={() => onEdit(entry)}
           aria-label={`Edit ${entry.hostname}`}
         >
           <Icon icon={EditIcon} size={20} />
-        </button>
-
-        {/* Duplicate */}
-        <button
-          onClick={() => console.log("Duplicate")}
-          className="p-2 rounded-lg text-outline-variant hover:text-primary hover:bg-primary-container/20 transition-all active:scale-90"
-          aria-label={`Duplicate ${entry.hostname}`}
-        >
-          <Icon icon={Copy01Icon} size={20} />
-        </button>
+        </Button>
 
         {/* Delete */}
-        <button
-          onClick={() => onDelete(entry.id)}
-          className="p-2 rounded-lg text-outline-variant hover:text-error hover:bg-error-container/20 transition-all active:scale-90"
+        <Button
+          size="icon"
+          variant="danger"
+          onClick={onDeleteIconClick}
           aria-label={`Delete ${entry.hostname}`}
         >
-          <Icon icon={Delete01Icon} size={20} color="red" />
-        </button>
+          <Icon icon={Delete01Icon} size={20} />
+        </Button>
       </div>
     </div>
   );

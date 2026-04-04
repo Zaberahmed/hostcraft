@@ -1,28 +1,42 @@
-import { tv } from "tailwind-variants";
+import { ReactNode } from "react";
+import { tv, VariantProps } from "tailwind-variants";
 
-export const badge = tv({
-  base: "px-2 py-0.5 rounded-md",
+const badge = tv({
+  base: "inline-flex items-center gap-1.5 font-bold font-label",
   variants: {
     color: {
-      default: "bg-primary-fixed-dim",
-      secondary: "bg-secondary-fixed-dim",
-      tertiary: "bg-tertiary-fixed-dim",
+      default: "bg-primary-fixed-dim text-on-surface-variant",
+      secondary: "bg-secondary-fixed-dim text-on-surface-variant",
+      tertiary: "bg-tertiary-fixed-dim text-on-surface-variant",
+      "tertiary-container": "bg-tertiary-container text-on-tertiary-container",
+      "secondary-container":
+        "bg-secondary-container text-on-secondary-container",
     },
-    textSize: {
-      default: "text-[10.5px]",
-      large: "text-lg",
+    size: {
+      default: "px-2 py-0.5 text-[10.5px]",
+      md: "px-3 py-1 text-xs",
     },
-    textColor: {
-      default: "text-on-surface-variant",
+    shape: {
+      rounded: "rounded-md",
+      pill: "rounded-full",
     },
-    fontFamily: {
-      default: "font-label",
+    isBeta: {
+      true: "uppercase",
     },
   },
   defaultVariants: {
     color: "default",
-    textSize: "default",
-    textColor: "default",
-    fontFamily: "default",
+    size: "default",
+    shape: "rounded",
   },
 });
+
+export const Badge = ({
+  children,
+  variants,
+}: {
+  children: ReactNode;
+  variants: VariantProps<typeof badge>;
+}) => {
+  return <span className={badge(variants)}> {children}</span>;
+};

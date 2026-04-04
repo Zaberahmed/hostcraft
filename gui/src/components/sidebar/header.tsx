@@ -1,8 +1,7 @@
-import { badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
 import { APP_SUBTITLE, APP_TITLE } from "@/constants/app.constant";
 import { useAppVersion } from "@/hooks/use-app-version";
-import { cn } from "@/lib/utils";
 import { isBetaVersion } from "@/utils/app-version";
 import { ServerStack01Icon } from "@hugeicons/core-free-icons";
 
@@ -27,9 +26,13 @@ export function SidebarHeader() {
               {APP_TITLE}
             </h1>
             {version && (
-              <span className={cn(badge(), isBeta && "uppercase")}>
+              <Badge
+                variants={{
+                  isBeta: isBeta,
+                }}
+              >
                 {isBeta ? "Beta" : `v${version}`}
-              </span>
+              </Badge>
             )}
           </div>
 
