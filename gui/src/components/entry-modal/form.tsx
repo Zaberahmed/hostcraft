@@ -1,67 +1,99 @@
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { useEntries } from "@/providers/entries.provider";
-import { isValidHostname, isValidIPv4 } from "@/utils/entries";
+import { useEntries, useSettings } from "@/providers";
+import { useEffect, useState } from "react";
+import { isUnChanged, validate } from "./utils";
+import { confirm } from "@tauri-apps/plugin-dialog";
+import type { FormData } from "./types";
 
 export function EntryForm() {
   const { modal, closeModal, addEntry, editEntry } = useEntries();
-  const [ip, setIp] = useState("");
-  const [hostname, setHostname] = useState("");
-  const [errors, setErrors] = useState({ ip: "", hostname: "" });
-
+  const { settings, validateDns } = useSettings();
   const isEdit = modal.mode === "edit";
 
-  function validate(): boolean {
-    const tempEntry = { ip: "", hostname: "" };
-    let valid = true;
+  const [formData, setFormData] = useState<FormData>({ ip: "", hostname: "" });
+  const [errors, setErrors] = useState<FormData>({ ip: "", hostname: "" });
+  const [isDisabled, setIsDisabled] = useState(() => isEdit);
 
-    if (!isValidIPv4(ip)) {
-      tempEntry.ip = "Enter a valid IPv4 address (e.g. 192.168.1.1)";
-      valid = false;
+  const formValidation = () => {
+    return validate({
+      formData,
+      setErrroCallback: (e) => setErrors(e),
+    });
+  };
+
+  const dnsValidation = async (hostname: string, ip: string) => {
+    if (settings?.dns_validation) {
+      const res = await validateDns(hostname, ip);
+
+      if (res?.lookup_failed) {
+        const ok = await confirm(
+          "DNS lookup failed — hostname could not be resolved.\nSave anyway?",
+          { kind: "warning", title: "DNS Lookup Failed" },
+        );
+        if (!ok) return false;
+      }
+
+      if (res?.conflict) {
+        const ok = await confirm(
+          `DNS mismatch detected.\n\nCurrent DNS resolves to: ${res?.resolved_ips.join(", ")}\nYou entered: ${ip}\n\nSave anyway?`,
+          { kind: "warning", title: "DNS Mismatch", okLabel: "Save anyway" },
+        );
+        if (!ok) return false;
+      }
     }
-    if (!isValidHostname(hostname)) {
-      tempEntry.hostname = "Enter a valid hostname (e.g. dev.local)";
-      valid = false;
-    }
+    return true;
+  };
 
-    setErrors(tempEntry);
-    return valid;
-  }
-
-  function handleSubmit(e: React.SubmitEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
-    if (!validate()) return;
+    const ip = formData.ip.trim();
+    const hostname = formData.hostname.trim();
+
+    if (!formValidation()) return;
+    if (!(await dnsValidation(hostname, ip))) return;
 
     if (isEdit) {
-      editEntry(modal.entry.id, ip.trim(), hostname.trim());
+      editEntry(modal.entry.id, ip, hostname);
     } else {
-      addEntry(ip.trim(), hostname.trim());
+      addEntry(ip, hostname);
     }
   }
 
   // Clear individual field errors as the user types corrections
   function handleIpChange(v: string) {
-    setIp(v);
+    setFormData((prev) => ({ ...prev, ip: v }));
     if (errors.ip) setErrors((prev) => ({ ...prev, ip: "" }));
   }
 
   function handleHostnameChange(v: string) {
-    setHostname(v);
+    setFormData((prev) => ({ ...prev, hostname: v }));
     if (errors.hostname) setErrors((prev) => ({ ...prev, hostname: "" }));
   }
 
   // Populate or reset fields whenever the modal mode / target entry changes
   useEffect(() => {
     if (isEdit) {
-      setIp(modal.entry.ip);
-      setHostname(modal.entry.hostname);
+      setFormData({
+        ip: modal.entry.ip,
+        hostname: modal.entry.hostname,
+      });
     } else if (modal.mode === "add") {
-      setIp("");
-      setHostname("");
+      setFormData({ ip: "", hostname: "" });
     }
     setErrors({ ip: "", hostname: "" });
   }, [modal]);
+
+  // Disable the submit button if the form data matches the entry being edited
+  useEffect(() => {
+    if (isEdit) {
+      if (isUnChanged(modal.entry, formData)) {
+        setIsDisabled(true);
+      } else {
+        setIsDisabled(false);
+      }
+    }
+  }, [formData]);
 
   return (
     <form onSubmit={handleSubmit} noValidate>
@@ -69,7 +101,7 @@ export function EntryForm() {
         <Field
           id="entry-ip"
           label="IP Address"
-          value={ip}
+          value={formData.ip}
           onChange={handleIpChange}
           placeholder="192.168.1.1"
           error={errors.ip}
@@ -79,7 +111,7 @@ export function EntryForm() {
         <Field
           id="entry-hostname"
           label="Hostname"
-          value={hostname}
+          value={formData.hostname}
           onChange={handleHostnameChange}
           placeholder="dev.local"
           error={errors.hostname}
@@ -94,7 +126,13 @@ export function EntryForm() {
         </Button>
 
         {/* Save / Add */}
-        <Button type="submit" variant="primary" size="md" shadow="md">
+        <Button
+          type="submit"
+          variant="primary"
+          size="md"
+          shadow="md"
+          disabled={isDisabled}
+        >
           {isEdit ? "Save Changes" : "Add Entry"}
         </Button>
       </div>

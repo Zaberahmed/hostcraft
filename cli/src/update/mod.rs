@@ -5,16 +5,17 @@ use std::error::Error;
 use std::sync::mpsc;
 use std::thread;
 use utils::{
-    CRATE_NAME, api_url, fetch_from_crates_io, is_newer_version, record_last_checked,
-    should_check_for_update,
+    binary_download_url, current_target, download_bytes, fetch_latest_cli_release,
+    is_newer_version, record_last_checked, replace_binary, should_check_for_update,
+    version_from_tag,
 };
 
-// ── Public API ────────────────────────────────────────────────────────────────
+// ── Public API ─────────────────────────────────────────────────────────────────
 
-/// Spawns a background thread to check crates.io for a newer version.
-/// Returns a handle that blocks until the result is ready when called.
-/// Skips the check entirely if it was performed within the last 24 hours.
-/// Network failures are silently ignored.
+/// Spawns a background thread to check GitHub for a newer CLI version.
+/// Returns a lazy handle — calling the handle blocks until the result is ready.
+/// The check is skipped entirely if one ran within the last 24 hours.
+/// Network failures are silently swallowed so they never interrupt normal usage.
 pub fn check_for_update() -> Box<dyn FnOnce() -> Option<String>> {
     if !should_check_for_update() {
         return Box::new(|| None);
@@ -31,25 +32,61 @@ pub fn check_for_update() -> Box<dyn FnOnce() -> Option<String>> {
     Box::new(move || rx.recv().ok().flatten())
 }
 
-/// Checks crates.io for a newer version.
-/// Returns Ok(Some(version)) if a newer version is available,
-/// Ok(None) if already up to date, or Err if the check failed.
+/// Asks GitHub releases whether there is a newer version.
+/// Returns Ok(Some(version_string)) if there is, Ok(None) if already current,
+/// or Err if the network request failed or the response was unparseable.
 pub fn fetch_latest_version() -> Result<Option<String>, Box<dyn Error>> {
-    let response = fetch_from_crates_io(&api_url())
-        .ok_or_else(|| "Failed to reach crates.io or parse response".to_string())?;
+    let release = fetch_latest_cli_release()
+        .ok_or("Could not fetch release info from GitHub. Check your connection.")?;
 
-    let latest = response.info.newest_version;
+    let version = version_from_tag(&release.tag_name)
+        .ok_or_else(|| format!("Unexpected tag format: '{}'", release.tag_name))?;
 
-    let is_newer =
-        is_newer_version(&latest).ok_or_else(|| format!("Failed to parse version '{}'", latest))?;
+    let is_newer = is_newer_version(version)
+        .ok_or_else(|| format!("Could not parse version string: '{}'", version))?;
 
-    if is_newer { Ok(Some(latest)) } else { Ok(None) }
+    Ok(if is_newer {
+        Some(version.to_owned())
+    } else {
+        None
+    })
 }
 
-/// Installs the latest version of hostcraft using cargo.
-pub fn install_latest() -> Result<(), Box<dyn Error>> {
+/// Full update flow for the `hostcraft update` command.
+pub fn handle_update() -> Result<(), Box<dyn Error>> {
+    let latest =
+        fetch_latest_version().map_err(|e| format!("Failed to check for updates: {}", e))?;
+
+    match latest {
+        None => print_up_to_date(),
+        Some(version) => {
+            print_updating(&version);
+            install_latest(&version).map_err(|e| format!("Update failed: {}", e))?;
+            print_success(&format!("Updated to v{}", version));
+        }
+    }
+    Ok(())
+}
+
+// ── Private ────────────────────────────────────────────────────────────────────
+
+/// Downloads the binary for the current platform from GitHub and self-replaces.
+/// Falls back to `cargo install` if no pre-built binary matches this platform
+/// (e.g. someone compiled from source on a niche target).
+fn install_latest(version: &str) -> Result<(), Box<dyn Error>> {
+    match current_target() {
+        Some(target) => {
+            let url = binary_download_url(version, target);
+            let bytes = download_bytes(&url)?;
+            replace_binary(&bytes)
+        }
+        None => install_via_cargo(),
+    }
+}
+
+fn install_via_cargo() -> Result<(), Box<dyn Error>> {
     let status = std::process::Command::new("cargo")
-        .args(["install", CRATE_NAME])
+        .args(["install", "hostcraft-cli"])
         .status()
         .map_err(|e| format!("Failed to run cargo: {}", e))?;
 
@@ -58,17 +95,4 @@ pub fn install_latest() -> Result<(), Box<dyn Error>> {
     } else {
         Err(format!("cargo install exited with status: {}", status).into())
     }
-}
-
-/// Runs the update flow for the `hostcraft update` command.
-pub fn handle_update() -> Result<(), Box<dyn Error>> {
-    match fetch_latest_version().map_err(|e| format!("Failed to check for updates: {}", e))? {
-        None => print_up_to_date(),
-        Some(latest) => {
-            print_updating(&latest);
-            install_latest().map_err(|e| format!("Update failed: {}", e))?;
-            print_success(&format!("Updated to v{}", latest));
-        }
-    }
-    Ok(())
 }

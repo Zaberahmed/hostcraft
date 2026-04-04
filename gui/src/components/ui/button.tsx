@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
 export const button = tv({
-  base: "inline-flex items-center justify-center transition-all duration-150 font-semibold disabled:opacity-50 disabled:pointer-events-none",
+  base: "inline-flex items-center justify-center transition-all duration-150 font-semibold disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-none",
   variants: {
     variant: {
       primary: [
-        "text-on-primary rounded-xl",
+        "rounded-xl text-on-primary",
         "bg-linear-to-r from-primary to-primary-dim",
         "hover:brightness-105",
         "active:scale-[0.98]",
@@ -27,9 +27,14 @@ export const button = tv({
         "rounded-lg bg-surface-container-low text-on-surface-variant",
         "hover:bg-surface-container",
       ],
+      text: [
+        "rounded text-on-primary-fixed",
+        "hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+      ],
     },
     size: {
       icon: "p-2",
+      xs: "text-xs",
       sm: "px-5 py-2.5 text-sm gap-2",
       md: "px-5 py-2 text-sm gap-2",
       full: "w-full py-3 text-sm gap-2",
@@ -41,7 +46,11 @@ export const button = tv({
     duration: {
       lg: "duration-300",
     },
+    isActive: {
+      true: "bg-primary-container text-on-primary-container hover:bg-primary-container",
+    },
   },
+
   defaultVariants: {
     variant: "ghost",
     size: "sm",
@@ -53,10 +62,13 @@ interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariants {}
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, size, shadow, duration, className, ...props }, ref) => (
+  ({ variant, size, shadow, duration, isActive, className, ...props }, ref) => (
     <button
       ref={ref}
-      className={cn(button({ variant, size, shadow, duration }), className)}
+      className={cn(
+        button({ variant, size, shadow, duration, isActive }),
+        className,
+      )}
       {...props}
     />
   ),

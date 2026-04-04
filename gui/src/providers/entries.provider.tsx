@@ -1,9 +1,8 @@
-import type {
-  AccentColor,
-  BaseHostEntry,
-  HostEntry,
-} from "@/entities/host.model";
-import { invoke } from "@tauri-apps/api/core";
+import type { HostEntry } from "@/entities/host.model";
+import { useTauriCommands } from "@/hooks/use-tauri-commands";
+import { transformResponse } from "@/utils/entries";
+import { showErrorToast } from "@/utils/error";
+import { listen } from "@tauri-apps/api/event";
 import {
   createContext,
   useCallback,
@@ -33,26 +32,20 @@ interface EntriesContextValue {
   editEntry: (id: string, ip: string, name: string) => void;
   toggleEntry: (name: string) => void;
   deleteEntry: (name: string) => void;
-  cacheBuster: refetchKeys;
-  loading: boolean;
+  refetchEntries: () => void;
 }
-
-const ACCENT_COLORS: AccentColor[] = [
-  "primary",
-  "tertiary",
-  "secondary",
-  "outline-variant",
-];
 
 const EntriesContext = createContext<EntriesContextValue | null>(null);
 
 export function EntriesProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<HostEntry[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
   const [cacheBuster, setCacheBuster] = useState<refetchKeys>({
     entries: new Date(),
   });
+
+  const { get_entries, add_entry, edit_entry, toggle_entry, delete_entry } =
+    useTauriCommands();
 
   const openAddModal = useCallback(() => setModal({ mode: "add" }), []);
   const openEditModal = useCallback(
@@ -65,37 +58,31 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
 
   const fetchEntries = async () => {
     try {
-      const result = await invoke<BaseHostEntry[]>("get_entries");
-      const modifiedResult = result.map((entry, index) => {
-        const randomId = crypto.randomUUID();
-        return {
-          ...entry,
-          id: randomId,
-          hostname: entry.name,
-          enabled: entry.status === "Active",
-          accent: ACCENT_COLORS[index % ACCENT_COLORS.length],
-        };
-      });
-      setEntries(modifiedResult);
+      const result = await get_entries();
+      setEntries(() => transformResponse(result));
     } catch (error) {
       toast.error("Error while loading host entries");
+      setEntries([]);
     }
   };
 
+  const refetchEntries = useCallback(() => {
+    setCacheBuster({ entries: new Date() });
+  }, []);
+
   useEffect(() => {
-    setLoading(true);
-    fetchEntries().finally(() => setLoading(false));
+    fetchEntries();
   }, [cacheBuster]);
 
   const addEntry = useCallback(
     async (ip: string, name: string) => {
       try {
-        await invoke("add_entry", { ip, name });
+        await add_entry(ip, name);
         toast.success("Entry added successfully");
-        setCacheBuster({ entries: new Date() });
+        refetchEntries();
         closeModal();
       } catch (error) {
-        toast.error("Error while adding entry");
+        showErrorToast(error, "Adding");
       }
     },
     [closeModal],
@@ -103,41 +90,50 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   const editEntry = useCallback(
     async (id: string, ip: string, name: string) => {
       const old_entry = entries.find((e) => e.id === id);
+      if (!old_entry) {
+        toast.error("Entry not found");
+        return;
+      }
       try {
-        await invoke<HostEntry[]>("edit_entry", {
-          oldName: old_entry?.hostname,
-          newIp: ip,
-          newName: name,
-        });
+        await edit_entry(old_entry.hostname, ip, name);
         toast.success("Entry edited successfully");
-        setCacheBuster({ entries: new Date() });
+        refetchEntries();
         closeModal();
       } catch (error) {
-        toast.error("Error while editing entry");
+        showErrorToast(error, "Editing");
       }
     },
-    [closeModal],
+    [closeModal, entries],
   );
 
   const toggleEntry = useCallback(async (name: string) => {
     try {
-      await invoke<HostEntry[]>("toggle_entry", { name });
+      await toggle_entry(name);
       toast.success("Entry toggled successfully");
-      setCacheBuster({ entries: new Date() });
+      refetchEntries();
     } catch (error) {
-      toast.error("Error while toggling entry");
+      showErrorToast(error, "Toggling");
     }
   }, []);
 
   const deleteEntry = useCallback(async (name: string) => {
     try {
-      await invoke("remove_entry", { name });
+      await delete_entry(name);
       toast.success("Entry deleted successfully");
-      setCacheBuster({ entries: new Date() });
+      refetchEntries();
     } catch (error) {
-      toast.error("Error while deleting entry");
+      showErrorToast(error, "Deleting");
     }
   }, []);
+
+  useEffect(() => {
+    const unlisten = listen("hosts-file-changed", () => {
+      refetchEntries();
+    });
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, [refetchEntries]);
 
   return (
     <EntriesContext.Provider
@@ -151,8 +147,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         editEntry,
         toggleEntry,
         deleteEntry,
-        cacheBuster,
-        loading,
+        refetchEntries,
       }}
     >
       {children}
