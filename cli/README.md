@@ -24,6 +24,8 @@ A fast, cross-platform CLI for managing your system hosts file — add, remove, 
 - **Add** a new entry with an IP address and hostname
 - **Remove** entries by full or partial name match
 - **Toggle** entries on/off without deleting them
+- **Update** to the latest version with a single command — `hostcraft update`
+- Background update checks — once every 24 hours, a notice is printed at the end of any command if a newer version is available
 - Entries are never silently lost — disabled entries are preserved as commented-out lines
 - Duplicate entry detection — adding the same IP + hostname twice is rejected
 - IPv4 and IPv6 support
@@ -73,6 +75,9 @@ sudo hostcraft toggle myapp.local
 
 # Remove it entirely
 sudo hostcraft remove myapp.local
+
+# Update to the latest version
+hostcraft update
 ```
 
 > **Why sudo?** Your system hosts file is a protected system file. Reading it works without elevated privileges, but any command that writes — `add`, `remove`, `toggle` — requires `sudo` on macOS/Linux or running as Administrator on Windows.
@@ -150,6 +155,40 @@ sudo hostcraft toggle myapp.local
 ```
 
 Supports partial name matching — `hostcraft toggle myapp` toggles all entries whose hostname contains `"myapp"`.
+
+---
+
+### `update`
+
+Checks crates.io for a newer version of hostcraft and installs it automatically if one is available.
+
+```sh
+hostcraft update
+```
+
+If already on the latest version:
+
+```
+✓ hostcraft is up to date (v1.0.1)
+```
+
+If a newer version is found, it runs `cargo install hostcraft-cli` under the hood and streams cargo's progress live to your terminal, then confirms when done:
+
+```
+↑ Updating v1.0.1 → v1.1.0 ...
+   Compiling hostcraft-cli v1.1.0
+   ...
+✓ Updated to v1.1.0
+```
+
+> **Passive notices:** hostcraft also checks for updates silently in the background once every 24 hours. If a newer version is found, a notice is printed at the end of whatever command you ran:
+>
+> ```
+> ↑ Update available: v1.0.1 → v1.1.0
+>   Run `hostcraft update` to install.
+> ```
+>
+> The check runs in a background thread and does not add any latency to your command.
 
 ---
 
@@ -268,9 +307,16 @@ hostcraft/
 │
 └── cli/                   # hostcraft-cli — this crate
     └── src/
-        ├── main.rs        # Entry point — parses args, delegates to run()
-        ├── command.rs     # CLI definition (Cli, Command) + run() dispatch
-        └── display.rs     # Coloured output — styles and print functions
+        ├── main.rs           # Entry point — parses args, wires background update check
+        ├── command/
+        │   ├── mod.rs        # CLI definition (Cli, Command) + run() dispatch
+        │   └── utils.rs      # Write helpers with permission-aware error messages
+        ├── display/
+        │   ├── mod.rs        # Coloured output — all print functions
+        │   └── style.rs      # ANSI style constants (pub(super))
+        └── update/
+            ├── mod.rs        # Update checker — public API and command handler
+            └── utils.rs      # HTTP fetch, version compare, state file helpers
 ```
 
 ### Running tests
