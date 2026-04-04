@@ -1,28 +1,38 @@
-import { useState, createContext, useContext } from "react";
+import type { Theme } from "@/entities/settings.model";
+import { createContext, useContext, useEffect } from "react";
+import { useSettings } from "./settings.provider";
 
 interface ThemeContextType {
-  theme: "light" | "dark";
-  setTheme: (theme: "light" | "dark") => void;
+  currentTheme: Theme | undefined;
   toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-export const useThemeContext = () => {
-  const ctx = useContext(ThemeContext);
-  if (!ctx)
-    throw new Error("useThemeContext must be used within ThemeProvider");
-  return ctx;
-};
-
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { settings, saveSettings } = useSettings();
+  const currentTheme = settings?.theme;
+  const toggleTheme = () => {
+    const newTheme = currentTheme?.toLowerCase() === "light" ? "dark" : "light";
+    saveSettings({ theme: newTheme });
+  };
 
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+  useEffect(() => {
+    document.documentElement.classList.toggle(
+      "dark",
+      currentTheme?.toLowerCase() === "dark",
+    );
+  }, [currentTheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
-      <div className={theme}>{children}</div>
+    <ThemeContext.Provider value={{ currentTheme, toggleTheme }}>
+      <div className={currentTheme}>{children}</div>
     </ThemeContext.Provider>
   );
+};
+
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  return ctx;
 };
