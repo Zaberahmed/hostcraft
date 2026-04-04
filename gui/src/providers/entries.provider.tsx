@@ -34,7 +34,7 @@ interface EntriesContextValue {
   toggleEntry: (name: string) => void;
   deleteEntry: (name: string) => void;
   cacheBuster: refetchKeys;
-  loading: boolean;
+  isLoading: boolean;
 }
 
 const ACCENT_COLORS: AccentColor[] = [
@@ -48,7 +48,7 @@ const EntriesContext = createContext<EntriesContextValue | null>(null);
 
 export function EntriesProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<HostEntry[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
   const [cacheBuster, setCacheBuster] = useState<refetchKeys>({
     entries: new Date(),
@@ -83,8 +83,8 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    setLoading(true);
-    fetchEntries().finally(() => setLoading(false));
+    setIsLoading(true);
+    fetchEntries().finally(() => setIsLoading(false));
   }, [cacheBuster]);
 
   const addEntry = useCallback(
@@ -95,7 +95,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         setCacheBuster({ entries: new Date() });
         closeModal();
       } catch (error) {
-        toast.error("Error while adding entry");
+        toast.error(`Error while adding entry: ${error}`);
       }
     },
     [closeModal],
@@ -103,9 +103,13 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   const editEntry = useCallback(
     async (id: string, ip: string, name: string) => {
       const old_entry = entries.find((e) => e.id === id);
+      if (!old_entry) {
+        toast.error("Entry not found");
+        return;
+      }
       try {
-        await invoke<HostEntry[]>("edit_entry", {
-          oldName: old_entry?.hostname,
+        await invoke("edit_entry", {
+          oldName: old_entry.hostname,
           newIp: ip,
           newName: name,
         });
@@ -113,7 +117,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         setCacheBuster({ entries: new Date() });
         closeModal();
       } catch (error) {
-        toast.error("Error while editing entry");
+        toast.error(`Error while editing entry: ${error}`);
       }
     },
     [closeModal],
@@ -121,11 +125,11 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
 
   const toggleEntry = useCallback(async (name: string) => {
     try {
-      await invoke<HostEntry[]>("toggle_entry", { name });
+      await invoke("toggle_entry", { name });
       toast.success("Entry toggled successfully");
       setCacheBuster({ entries: new Date() });
     } catch (error) {
-      toast.error("Error while toggling entry");
+      toast.error(`Error while toggling entry: ${error}`);
     }
   }, []);
 
@@ -135,7 +139,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       toast.success("Entry deleted successfully");
       setCacheBuster({ entries: new Date() });
     } catch (error) {
-      toast.error("Error while deleting entry");
+      toast.error(`Error while deleting entry: ${error}`);
     }
   }, []);
 
@@ -152,7 +156,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         toggleEntry,
         deleteEntry,
         cacheBuster,
-        loading,
+        isLoading,
       }}
     >
       {children}
