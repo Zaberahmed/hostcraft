@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ServerStack01Icon, Settings01Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+// import { Badge } from "@/components/ui/badge";
 
 const navItems = [
   {
@@ -13,6 +14,7 @@ const navItems = [
     path: "/settings",
     label: "Settings",
     icon: Settings01Icon,
+    // isComingSoon: false,
   },
 ];
 
@@ -24,6 +26,34 @@ export function Navigation() {
       <nav className="flex flex-col gap-1">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
+
+          // if (item.isComingSoon) {
+          //   return (
+          //     <div
+          //       key={item.path}
+          //       className="group relative flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 opacity-50 cursor-not-allowed text-on-surface-variant"
+          //     >
+          //       <Icon
+          //         icon={item.icon}
+          //         size={18}
+          //         strokeWidth={1.5}
+          //         className="transition-colors text-on-surface-variant"
+          //       />
+          //       <span className="font-headline tracking-tight">
+          //         {item.label}
+          //       </span>
+          //       <Badge
+          //         variants={{
+          //           color: "tertiary-container",
+          //           size: "sm",
+          //           shape: "pill",
+          //         }}
+          //       >
+          //         Coming soon
+          //       </Badge>
+          //     </div>
+          //   );
+          // }
 
           return (
             <Link

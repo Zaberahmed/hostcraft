@@ -1,0 +1,235 @@
+name: CLI Release
+
+on:
+  push:
+    tags:
+      - "cli-v*" # fires on cli-v2.0.1, cli-v2.1.0, etc.
+        # deliberately separate from the GUI's "v*" tags
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ── Job 1: Build a binary for each platform ──────────────────────────────────
+  build:
+    name: Build — ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false # one platform failing won't cancel the others
+      matrix:
+        include:
+          # macOS: we build BOTH arm64 and x86_64, then fuse them with `lipo`
+          # into a single "universal" binary that runs natively on any Mac.
+          - name: macOS universal
+            os: macos-latest
+            target: universal-apple-darwin
+            archive_ext: tar.gz
+
+          - name: Linux x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive_ext: tar.gz
+
+          # ARM64 Linux can't run natively on GitHub's x86_64 runners,
+          # so we use `cross` — a tool that cross-compiles inside Docker.
+          - name: Linux ARM64
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            archive_ext: tar.gz
+            use_cross: true
+
+          - name: Windows x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive_ext: zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install the Rust toolchain.
+      # macOS needs BOTH sub-targets registered so we can build each
+      # separately before fusing them. Everyone else just needs their own.
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: >-
+            ${{
+              matrix.target == 'universal-apple-darwin'
+                && 'aarch64-apple-darwin,x86_64-apple-darwin'
+                || matrix.target
+            }}
+
+      # Cache ~/.cargo/registry and the compiled dependency artifacts.
+      # Dramatically speeds up repeat runs — only your code recompiles.
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+
+      # taiki-e/install-action downloads pre-built tool binaries from GitHub
+      # Releases — much faster than `cargo install cross`.
+      - name: Install cross (Linux ARM64 only)
+        if: matrix.use_cross == true
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      # ── Build ──────────────────────────────────────────────────────────────
+
+      # Standard single-target build (Linux x86_64, Windows).
+      # -p hostcraft-cli tells Cargo to only build that workspace member.
+      - name: Build — standard
+        if: "!matrix.use_cross && matrix.target != 'universal-apple-darwin'"
+        run: cargo build --release --target ${{ matrix.target }} -p hostcraft-cli
+
+      # cross is a drop-in cargo replacement that compiles inside a Docker
+      # container pre-loaded with the right cross-linker and sysroot.
+      - name: Build — cross (Linux ARM64)
+        if: matrix.use_cross == true
+        run: cross build --release --target ${{ matrix.target }} -p hostcraft-cli
+
+      # macOS: build each architecture separately, then fuse with lipo.
+      # The result is one fat binary that Macs detect and run the right slice of.
+      - name: Build — macOS universal
+        if: matrix.target == 'universal-apple-darwin'
+        run: |
+          cargo build --release --target aarch64-apple-darwin -p hostcraft-cli
+          cargo build --release --target x86_64-apple-darwin  -p hostcraft-cli
+          mkdir -p staging
+          lipo -create \
+            target/aarch64-apple-darwin/release/hostcraft \
+            target/x86_64-apple-darwin/release/hostcraft  \
+            -output staging/hostcraft
+
+      # ── Stage the binary into ./staging/ ───────────────────────────────────
+
+      - name: Stage binary (Linux / non-universal macOS)
+        if: "matrix.os != 'windows-latest' && matrix.target != 'universal-apple-darwin'"
+        run: |
+          mkdir -p staging
+          cp target/${{ matrix.target }}/release/hostcraft staging/hostcraft
+
+      - name: Stage binary (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force staging | Out-Null
+          Copy-Item target\${{ matrix.target }}\release\hostcraft.exe `
+                    staging\hostcraft.exe
+
+      # ── Package ────────────────────────────────────────────────────────────
+      # We produce two assets per platform:
+      #   1. An archive (.tar.gz / .zip) — for humans downloading manually
+      #   2. A raw binary                — for `hostcraft update` to self-patch
+
+      - name: Package archive (tar.gz — Unix)
+        if: matrix.archive_ext == 'tar.gz'
+        run: |
+          tar -czf "hostcraft-${{ matrix.target }}.tar.gz" \
+              -C staging hostcraft
+
+      - name: Package archive (zip — Windows)
+        if: matrix.archive_ext == 'zip'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path staging\hostcraft.exe `
+                           -DestinationPath "hostcraft-${{ matrix.target }}.zip"
+
+      # ── Upload artifacts ───────────────────────────────────────────────────
+      # Artifacts are stored temporarily between jobs.
+      # Each gets a unique name so they don't collide in the download step.
+
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-${{ matrix.target }}
+          path: hostcraft-${{ matrix.target }}.${{ matrix.archive_ext }}
+
+      - name: Upload raw binary (Unix)
+        if: matrix.os != 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: staging/hostcraft
+
+      - name: Upload raw binary (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: staging/hostcraft.exe
+
+  # ── Job 2: Collect artifacts and publish the release ─────────────────────────
+  release:
+    name: Publish GitHub Release
+    needs: build # only runs if ALL 4 build jobs succeeded
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # needed to create the release and upload assets
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The tag is "cli-v2.0.1". Strip "cli-" so the release title reads
+      # "CLI v2.0.1" instead of "CLI cli-v2.0.1".
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF_NAME#cli-}" >> $GITHUB_ENV
+
+      # Download every artifact from Job 1.
+      # Each artifact ends up in its own subdirectory:
+      #   artifacts/archive-universal-apple-darwin/hostcraft-universal-apple-darwin.tar.gz
+      #   artifacts/binary-universal-apple-darwin/hostcraft
+      #   ... etc.
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      # Flatten everything into a single release-assets/ directory with
+      # consistent, descriptive filenames.
+      - name: Prepare release assets
+        run: |
+          mkdir release-assets
+
+          # Archives (for manual download)
+          cp artifacts/archive-universal-apple-darwin/hostcraft-universal-apple-darwin.tar.gz    release-assets/
+          cp artifacts/archive-x86_64-unknown-linux-gnu/hostcraft-x86_64-unknown-linux-gnu.tar.gz   release-assets/
+          cp artifacts/archive-aarch64-unknown-linux-gnu/hostcraft-aarch64-unknown-linux-gnu.tar.gz  release-assets/
+          cp artifacts/archive-x86_64-pc-windows-msvc/hostcraft-x86_64-pc-windows-msvc.zip          release-assets/
+
+          # Raw binaries (used by `hostcraft update` to self-patch)
+          cp artifacts/binary-universal-apple-darwin/hostcraft     release-assets/hostcraft-universal-apple-darwin
+          cp artifacts/binary-x86_64-unknown-linux-gnu/hostcraft   release-assets/hostcraft-x86_64-unknown-linux-gnu
+          cp artifacts/binary-aarch64-unknown-linux-gnu/hostcraft  release-assets/hostcraft-aarch64-unknown-linux-gnu
+          cp artifacts/binary-x86_64-pc-windows-msvc/hostcraft.exe release-assets/hostcraft-x86_64-pc-windows-msvc.exe
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: CLI ${{ env.VERSION }}
+          body: |
+            ## Install
+
+            **macOS / Linux — one-liner:**
+            ```sh
+            curl -fsSL https://raw.githubusercontent.com/Zaberahmed/hostcraft/main/install.sh | sh
+            ```
+
+            **Windows — PowerShell:**
+            ```powershell
+            irm https://raw.githubusercontent.com/Zaberahmed/hostcraft/main/install.ps1 | iex
+            ```
+
+            **Manual download:**
+
+            | Platform | Archive | Raw binary |
+            |---|---|---|
+            | macOS (Apple Silicon + Intel) | `hostcraft-universal-apple-darwin.tar.gz` | `hostcraft-universal-apple-darwin` |
+            | Linux x86_64 | `hostcraft-x86_64-unknown-linux-gnu.tar.gz` | `hostcraft-x86_64-unknown-linux-gnu` |
+            | Linux ARM64 | `hostcraft-aarch64-unknown-linux-gnu.tar.gz` | `hostcraft-aarch64-unknown-linux-gnu` |
+            | Windows x86_64 | `hostcraft-x86_64-pc-windows-msvc.zip` | `hostcraft-x86_64-pc-windows-msvc.exe` |
+
+            ---
+            **Rust users:** `cargo install hostcraft-cli` still works as before.
+          files: release-assets/*
+          draft: false
+          prerelease: false
