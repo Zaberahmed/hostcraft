@@ -15,6 +15,7 @@ const badge = tv({
     size: {
       default: "px-2 py-0.5 text-[10.5px]",
       md: "px-3 py-1 text-xs",
+      sm: "px-2 py-0.5 text-[10.5px]",
     },
     shape: {
       rounded: "rounded-md",

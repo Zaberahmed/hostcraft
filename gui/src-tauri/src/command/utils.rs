@@ -1,23 +1,8 @@
-use hostcraft_core::file;
-use std::error::Error;
+use hostcraft_core::{file, host, platform::get_hosts_path, HostEntry};
+use std::path::PathBuf;
 
-pub fn write_hosts(
-    path: &str,
-    entries: &[hostcraft_core::HostEntry],
-) -> Result<(), Box<dyn Error>> {
-    file::write_file(path, entries).map_err(|e| {
-        if e.kind() == std::io::ErrorKind::PermissionDenied {
-            if cfg!(target_os = "windows") {
-                format!(
-                    "Permission denied: run as Administrator to modify '{}'",
-                    path
-                )
-            } else {
-                format!("Permission denied: run with sudo to modify '{}'", path)
-            }
-        } else {
-            format!("Failed to write hosts file '{}': {}", path, e)
-        }
-        .into()
-    })
+pub fn read_file_get_parsed_contents_and_path() -> Result<(Vec<HostEntry>, PathBuf), String> {
+    let path = get_hosts_path().map_err(|e| e.to_string())?;
+    let file = file::read_file(&path).map_err(|e| e.to_string())?;
+    Ok((host::parse_contents(file), path))
 }
