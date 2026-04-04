@@ -1,1 +1,3 @@
 target/
+gui/node_modules/
+gui/src-tauri/gen/schemas/
