@@ -1,5 +1,29 @@
-import type { HostEntry } from "@/pages/host-entries/host.model";
+import type { HostEntry } from "@/entities/host.model";
 
-export const activeEntriesCount = (entries: HostEntry[]): number => {
+export function activeEntriesCount(entries: HostEntry[]): number {
   return entries.filter((entry) => entry.enabled).length;
-};
+}
+
+export function isValidIPv4(value: string): boolean {
+  const trimmed = value.trim();
+  const parts = trimmed.split(".");
+  if (parts.length !== 4) return false;
+  return parts.every((part) => {
+    if (part === "" || !/^\d+$/.test(part)) return false;
+    const n = parseInt(part, 10);
+    return n >= 0 && n <= 255;
+  });
+}
+
+export function isValidHostname(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 253) return false;
+  return trimmed
+    .split(".")
+    .every(
+      (label) =>
+        label.length > 0 &&
+        label.length <= 63 &&
+        /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(label),
+    );
+}

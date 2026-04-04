@@ -1,21 +1,22 @@
-import { Icon } from "@/components/ui/icon";
-import { Toggle } from "@/components/ui/toggle";
+import { useState } from "react";
 import {
-  Add01Icon,
   MoreIcon,
   SecuredNetworkIcon,
   ServerStack01Icon,
   Settings01Icon,
 } from "@hugeicons/core-free-icons";
-import { useState } from "react";
 import { SettingRow } from "./setting-row";
 import { SettingSection } from "./setting-section";
+import { Toggle } from "@/components/ui/toggle";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export default function Settings() {
   const [dnsValidation, setDnsValidation] = useState(true);
   const [isSystemTheme, setIsSystemTheme] = useState(false);
   const [autoReload, setAutoReload] = useState(false);
-  // const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
@@ -39,13 +40,22 @@ export default function Settings() {
             label="Update Notification"
             description="Show update notifications when a new version is available."
           >
-            {/*<Toggle
-              checked={showUpdateNotification}
-              onChange={setShowUpdateNotification}
-            />*/}
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-xs font-bold font-label">
+            <div className="hidden">
+              <Toggle
+                checked={showUpdateNotification}
+                onChange={setShowUpdateNotification}
+              />
+            </div>
+
+            <Badge
+              variants={{
+                color: "tertiary-container",
+                size: "md",
+                shape: "pill",
+              }}
+            >
               Coming soon
-            </span>
+            </Badge>
           </SettingRow>
         </SettingSection>
 
@@ -64,7 +74,14 @@ export default function Settings() {
             <input
               type="text"
               defaultValue="/etc/hosts"
-              className="w-48 px-3 py-1.5 text-sm rounded-lg bg-surface-container-low ghost-border text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all font-label"
+              className={cn(
+                "w-48 rounded-lg text-sm font-label",
+                "px-3 py-1.5",
+                "bg-surface-container-low text-on-surface",
+                "ghost-border",
+                "focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest",
+                "transition-all",
+              )}
             />
           </SettingRow>
         </SettingSection>
@@ -75,17 +92,29 @@ export default function Settings() {
             label="Require authentication"
             description="Prompt for system credentials before writing to the hosts file."
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-xs font-bold font-label">
+            <Badge
+              variants={{
+                color: "secondary-container",
+                size: "md",
+                shape: "pill",
+              }}
+            >
               Always on
-            </span>
+            </Badge>
           </SettingRow>
           <SettingRow
             label="Backup on change"
             description="Keep a timestamped backup of the hosts file before each write."
           >
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-xs font-bold font-label">
+            <Badge
+              variants={{
+                color: "tertiary-container",
+                size: "md",
+                shape: "pill",
+              }}
+            >
               Coming soon
-            </span>
+            </Badge>
           </SettingRow>
         </SettingSection>
 
@@ -95,30 +124,29 @@ export default function Settings() {
             label="Flush DNS cache"
             description="Flush the DNS cache to ensure changes are applied immediately."
           >
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-primary to-primary-dim text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl transition-all duration-300">
-              <span>Flush</span>
-            </button>
+            <Button variant="primary" size="sm" shadow="lg" duration="lg">
+              Flush
+            </Button>
           </SettingRow>
           <SettingRow
             label="Open in Editor"
             description="Open the hosts file in your default editor."
           >
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-primary to-primary-dim text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl transition-all duration-300">
-              <span>Open</span>
-            </button>
+            <Button variant="primary" size="sm" shadow="lg" duration="lg">
+              Open
+            </Button>
           </SettingRow>
         </SettingSection>
       </div>
 
       {/* Save Button */}
       <div className="mt-8 flex justify-end gap-3">
-        <button className="px-5 py-2.5 text-sm font-semibold text-primary rounded-lg hover:bg-primary-container/40 transition-colors">
+        <Button variant="subtle" size="sm" duration="lg">
           Reset to defaults
-        </button>
-        <button className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-primary to-primary-dim text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl transition-all duration-300">
-          <Icon icon={Add01Icon} size={15} strokeWidth={2.5} />
+        </Button>
+        <Button variant="primary" size="sm" shadow="lg" duration="lg">
           Save changes
-        </button>
+        </Button>
       </div>
     </div>
   );

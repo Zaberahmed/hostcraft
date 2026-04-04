@@ -1,6 +1,6 @@
 [package]
 name = "hostcraft-cli"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2024"
 authors = ["Sk. Zaber Ahmed"]
 description = "CLI for managing your system hosts file"
@@ -15,7 +15,7 @@ name = "hostcraft"
 path = "src/main.rs"
 
 [dependencies]
-hostcraft-core = "0.1.7"
+hostcraft-core = "0.1.8"
 clap = { version = "4", features = ["derive"] }
 anstyle = "1"
 anstream = "1"
