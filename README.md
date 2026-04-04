@@ -32,6 +32,7 @@ hostcraft list                              # view all entries
 sudo hostcraft add myapp.local 127.0.0.1   # add an entry
 sudo hostcraft toggle myapp.local          # enable / disable
 sudo hostcraft remove myapp.local          # remove permanently
+hostcraft update                           # update to the latest version
 ```
 
 > **Windows users:** run your terminal as Administrator instead of using `sudo`.
@@ -49,7 +50,7 @@ hostcraft/
 Each crate has its own README with full documentation:
 
 - [`core/README.md`](core/README.md) — API reference, usage examples, and integration guide
-- [`cli/README.md`](cli/README.md) — commands, options, permissions, and development guide
+- [`cli/README.md`](cli/README.md) — commands, options, permissions, update checker, and development guide
 
 ---
 
