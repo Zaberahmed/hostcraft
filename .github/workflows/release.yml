@@ -1,0 +1,88 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*" # fires on v0.1.0, v1.2.3, etc.
+
+jobs:
+  build-and-release:
+    permissions:
+      contents: write # needed to create and upload release assets
+
+    strategy:
+      fail-fast: false # one platform failing won't cancel the others
+      matrix:
+        include:
+          - os: macos-latest
+            args: --target universal-apple-darwin # single binary for ARM + Intel
+          - os: ubuntu-22.04
+            args: ""
+          - os: windows-latest
+            args: ""
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm must be set up before setup-node for caching to work
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: gui/pnpm-lock.yaml
+
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          # macOS needs both targets to produce the universal binary
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      # Caches the Cargo registry and compiled deps between runs
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./gui/src-tauri -> target
+
+      # Tauri v2 on Linux requires these system libraries
+      - name: Install Linux system dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install frontend dependencies
+        working-directory: gui
+        run: pnpm install
+
+      # tauri-action handles the build and release in one step
+      - name: Build and publish release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: gui
+          tagName: ${{ github.ref_name }}
+          releaseName: Hostcraft ${{ github.ref_name }}
+          releaseBody: |
+            Download the installer for your platform from the assets below.
+
+            | Platform | File |
+            |---|---|
+            | macOS | `.dmg` |
+            | Windows | `.msi` or `.exe` |
+            | Linux | `.AppImage` or `.deb` |
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
