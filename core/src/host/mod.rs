@@ -1,8 +1,10 @@
 mod utils;
+use crate::error::{HostCraftError, Result};
 use crate::host::utils::{is_duplicate_entry, parse_line};
-use std::{fmt, io, net::IpAddr};
+use serde::Serialize;
+use std::{fmt, io, net::IpAddr, result};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum HostStatus {
     Active,
     Inactive,
@@ -17,7 +19,7 @@ impl fmt::Display for HostStatus {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct HostEntry {
     pub status: HostStatus,
     pub ip: IpAddr,
@@ -39,38 +41,17 @@ impl fmt::Display for HostEntry {
     }
 }
 
-#[derive(Debug)]
-pub enum HostError {
-    DuplicateEntry,
-    EntryNotFound,
-}
-
-impl fmt::Display for HostError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            HostError::DuplicateEntry => write!(f, "You have inserted a duplicate entry."),
-            HostError::EntryNotFound => write!(f, "Please check the name and try again."),
-        }
-    }
-}
-
-impl std::error::Error for HostError {}
-
 pub fn parse_contents(contents: impl Iterator<Item = io::Result<String>>) -> Vec<HostEntry> {
     contents
-        .map_while(Result::ok)
+        .map_while(result::Result::ok)
         .filter_map(|line| parse_line(&line))
         .collect()
 }
 
-pub fn add_entry(
-    entries: &mut Vec<HostEntry>,
-    ip: IpAddr,
-    name: impl Into<String>,
-) -> Result<(), HostError> {
+pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: impl Into<String>) -> Result<()> {
     let name = name.into();
     if is_duplicate_entry(entries, ip, &name) {
-        return Err(HostError::DuplicateEntry);
+        return Err(HostCraftError::DuplicateEntry);
     }
     entries.push(HostEntry {
         status: HostStatus::Active,
@@ -80,16 +61,37 @@ pub fn add_entry(
     Ok(())
 }
 
-pub fn remove_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<(), HostError> {
+pub fn edit_entry(
+    entries: &mut Vec<HostEntry>,
+    name: &str,
+    new_ip: IpAddr,
+    new_name: &str,
+) -> Result<()> {
+    let pos = entries
+        .iter()
+        .position(|e| e.name == name)
+        .ok_or(HostCraftError::EntryNotFound)?;
+    if entries[pos].ip == new_ip && entries[pos].name == new_name {
+        return Err(HostCraftError::NoChange);
+    }
+    if is_duplicate_entry(entries, new_ip, new_name) {
+        return Err(HostCraftError::DuplicateEntry);
+    }
+    entries[pos].ip = new_ip;
+    entries[pos].name = new_name.to_string();
+    Ok(())
+}
+
+pub fn remove_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<()> {
     let original_len = entries.len();
     entries.retain(|e| !e.name.contains(partial_name));
     if entries.len() == original_len {
-        return Err(HostError::EntryNotFound);
+        return Err(HostCraftError::EntryNotFound);
     }
     Ok(())
 }
 
-pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<(), HostError> {
+pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<()> {
     let mut found = false;
     for entry in entries.iter_mut() {
         if entry.name.contains(partial_name) {
@@ -98,7 +100,7 @@ pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<
         }
     }
     if !found {
-        return Err(HostError::EntryNotFound);
+        return Err(HostCraftError::EntryNotFound);
     }
     Ok(())
 }
@@ -188,10 +190,53 @@ mod tests {
     fn add_entry_duplicate_returns_err_and_leaves_entries_unchanged() {
         let mut entries = sample_entries();
         let result = add_entry(&mut entries, ip(127, 0, 0, 1), "alpha.com".to_string());
-        assert!(matches!(result, Err(HostError::DuplicateEntry)));
+        assert!(matches!(result, Err(HostCraftError::DuplicateEntry)));
         assert_eq!(entries.len(), 2);
     }
+    // --- edit entry ---
+    #[test]
+    fn test_edit_updates_ip_and_name() {
+        let mut entries = sample_entries();
+        edit_entry(&mut entries, "alpha.com", ip(10, 0, 0, 1), "new-alpha.com").unwrap();
+        assert_eq!(entries[0].ip, ip(10, 0, 0, 1));
+        assert_eq!(entries[0].name, "new-alpha.com");
+    }
 
+    #[test]
+    fn test_edit_preserves_status_and_position() {
+        let mut entries = sample_entries();
+        edit_entry(&mut entries, "beta.com", ip(10, 0, 0, 2), "new-beta.com").unwrap();
+        assert_eq!(entries[1].name, "new-beta.com");
+        assert_eq!(entries[1].status, HostStatus::Inactive); // status untouched
+    }
+
+    #[test]
+    fn test_partial_name_does_not_match() {
+        let mut entries = sample_entries();
+        let result = edit_entry(&mut entries, "alpha", ip(10, 0, 0, 1), "new.com");
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
+    }
+
+    #[test]
+    fn test_no_match_returns_not_found() {
+        let mut entries = sample_entries();
+        let result = edit_entry(&mut entries, "notexist.com", ip(10, 0, 0, 1), "new.com");
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
+    }
+
+    #[test]
+    fn test_duplicate_in_different_entry_returns_error() {
+        let mut entries = sample_entries();
+        let result = edit_entry(&mut entries, "alpha.com", ip(192, 168, 0, 1), "beta.com");
+        assert!(matches!(result, Err(HostCraftError::DuplicateEntry)));
+    }
+
+    #[test]
+    fn test_edit_to_same_values_fails() {
+        let mut entries = sample_entries();
+        let result = edit_entry(&mut entries, "alpha.com", ip(127, 0, 0, 1), "alpha.com");
+        assert!(matches!(result, Err(HostCraftError::NoChange)));
+    }
     // --- remove_entry ---
 
     #[test]
@@ -224,7 +269,7 @@ mod tests {
     fn remove_entry_no_match_returns_err_and_leaves_entries_unchanged() {
         let mut entries = sample_entries();
         let result = remove_entry(&mut entries, "nonexistent.com");
-        assert!(matches!(result, Err(HostError::EntryNotFound)));
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
         assert_eq!(entries.len(), 2);
     }
 
@@ -268,6 +313,6 @@ mod tests {
     fn toggle_entry_no_match_returns_err() {
         let mut entries = sample_entries();
         let result = toggle_entry(&mut entries, "nonexistent.com");
-        assert!(matches!(result, Err(HostError::EntryNotFound)));
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
     }
 }

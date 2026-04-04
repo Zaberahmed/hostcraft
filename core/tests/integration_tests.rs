@@ -116,6 +116,28 @@ fn remove_then_round_trip_excludes_removed_entry() {
     assert_eq!(result[0].name, "beta.com");
 }
 
+#[test]
+fn edit_then_round_trip_updates_entry() {
+    let tmp = TempFile::new("edit_round_trip");
+    let mut entries = vec![
+        make_entry(ip(127, 0, 0, 1), "alpha.com", HostStatus::Active),
+        make_entry(ip(192, 168, 0, 1), "beta.com", HostStatus::Inactive),
+    ];
+
+    host::edit_entry(&mut entries, "alpha.com", ip(10, 0, 0, 1), "new-alpha.com")
+        .expect("Failed to edit");
+
+    file::write_file(tmp.path(), &entries).expect("Failed to write");
+    let lines = file::read_file(tmp.path()).expect("Failed to read");
+    let result = host::parse_contents(lines);
+
+    assert_eq!(result.len(), 2);
+    assert_eq!(result[0].ip, ip(10, 0, 0, 1));
+    assert_eq!(result[0].name, "new-alpha.com");
+    assert_eq!(result[0].status, HostStatus::Active);
+    assert_eq!(result[1].name, "beta.com");
+}
+
 // --- Edge cases ---
 
 #[test]

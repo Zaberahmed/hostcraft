@@ -1,0 +1,18 @@
+import { Sidebar } from "@/components/sidebar";
+import { Footer } from "@/components/footer";
+import { EntryModal } from "@/components/entry-modal";
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-svh w-full overflow-hidden">
+      <Sidebar />
+      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+        <main className="flex-1 overflow-y-auto bg-surface custom-scrollbar">
+          {children}
+        </main>
+        <Footer />
+      </div>
+      <EntryModal />
+    </div>
+  );
+}
