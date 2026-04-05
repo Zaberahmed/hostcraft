@@ -63,18 +63,21 @@ pub fn add_entry(entries: &mut Vec<HostEntry>, ip: IpAddr, name: impl Into<Strin
 
 pub fn edit_entry(
     entries: &mut Vec<HostEntry>,
-    name: &str,
+    old_name: impl Into<String>,
     new_ip: IpAddr,
-    new_name: &str,
+    new_name: impl Into<String>,
 ) -> Result<()> {
+    let old_name = old_name.into();
+    let new_name = new_name.into();
+
     let pos = entries
         .iter()
-        .position(|e| e.name == name)
+        .position(|e| e.name == old_name)
         .ok_or(HostCraftError::EntryNotFound)?;
     if entries[pos].ip == new_ip && entries[pos].name == new_name {
         return Err(HostCraftError::NoChange);
     }
-    if is_duplicate_entry(entries, new_ip, new_name) {
+    if is_duplicate_entry(entries, new_ip, &new_name) {
         return Err(HostCraftError::DuplicateEntry);
     }
     entries[pos].ip = new_ip;
