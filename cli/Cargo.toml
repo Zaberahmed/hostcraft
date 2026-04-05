@@ -15,7 +15,7 @@ name = "hostcraft"
 path = "src/main.rs"
 
 [dependencies]
-hostcraft-core = "1.1.0"
+hostcraft-core = "1.1.1"
 clap = { version = "4", features = ["derive"] }
 anstyle = "1"
 anstream = "1"
