@@ -1,4 +1,5 @@
 target/
+gui/.DS_Store/
 gui/node_modules/
 gui/src-tauri/gen/schemas/
 gui/.vite/

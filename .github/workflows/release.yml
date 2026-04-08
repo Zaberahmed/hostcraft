@@ -66,10 +66,15 @@ jobs:
         working-directory: gui
         run: pnpm install
 
-      - name: Clean Rust build cache (Windows)
-        if: matrix.os == 'windows-latest'
-        working-directory: gui/src-tauri
-        run: cargo clean
+      # - name: Clean Rust build cache (Windows)
+      #   if: matrix.os == 'windows-latest'
+      #   working-directory: gui/src-tauri
+      #   run: |
+      #     cargo clean
+      #     # Remove the entire target directory to ensure complete cleanup
+      #     Remove-Item -Recurse -Force target -ErrorAction SilentlyContinue
+      #     # Clear cargo registry cache as well
+      #     cargo cache --autoclean
 
       # tauri-action handles the build and release in one step
       - name: Build and publish release
