@@ -1,9 +1,12 @@
 fn main() {
+    let mut attributes = tauri_build::Attributes::new();
+
     #[cfg(target_os = "windows")]
     {
-        let mut res = winresource::WindowsResource::new();
-        res.set_manifest_file("app.manifest");
-        res.compile().unwrap();
+        attributes = attributes.windows_attributes(
+            tauri_build::WindowsAttributes::new().app_manifest(include_str!("app.manifest")),
+        );
     }
-    tauri_build::build()
+
+    tauri_build::try_build(attributes).expect("failed to run tauri-build");
 }
