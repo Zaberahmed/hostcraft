@@ -3,6 +3,7 @@ import type {
   BaseHostEntry,
   HostEntry,
 } from "@/entities/host.model";
+import { showErrorToast } from "@/utils/error";
 import { invoke } from "@tauri-apps/api/core";
 import {
   createContext,
@@ -95,7 +96,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         setCacheBuster({ entries: new Date() });
         closeModal();
       } catch (error) {
-        toast.error(`Error while adding entry: ${error}`);
+        showErrorToast(error, "Adding");
       }
     },
     [closeModal],
@@ -117,7 +118,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         setCacheBuster({ entries: new Date() });
         closeModal();
       } catch (error) {
-        toast.error(`Error while editing entry: ${error}`);
+        showErrorToast(error, "Editing");
       }
     },
     [closeModal],
@@ -129,7 +130,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       toast.success("Entry toggled successfully");
       setCacheBuster({ entries: new Date() });
     } catch (error) {
-      toast.error(`Error while toggling entry: ${error}`);
+      showErrorToast(error, "Toggling");
     }
   }, []);
 
@@ -139,7 +140,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       toast.success("Entry deleted successfully");
       setCacheBuster({ entries: new Date() });
     } catch (error) {
-      toast.error(`Error while deleting entry: ${error}`);
+      showErrorToast(error, "Deleting");
     }
   }, []);
 
