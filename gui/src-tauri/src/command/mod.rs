@@ -1,6 +1,7 @@
 mod utils;
 
-use hostcraft_core::{host, platform::write_hosts_to, HostCraftError, HostEntry};
+use crate::elevation::try_write_or_elevate;
+use hostcraft_core::{host, HostCraftError, HostEntry};
 use std::net::IpAddr;
 use utils::read_file_get_parsed_contents_and_path;
 
@@ -19,7 +20,7 @@ pub fn add_entry(ip: IpAddr, name: String) -> Result<(), String> {
         _ => format!("Failed to add entry: {}", e),
     })?;
 
-    write_hosts_to(&path, &entries).map_err(|e| e.to_string())?;
+    try_write_or_elevate(&path, &entries)?;
     Ok(())
 }
 
@@ -32,7 +33,7 @@ pub fn remove_entry(name: String) -> Result<(), String> {
         _ => format!("Failed to remove entry: {}", e),
     })?;
 
-    write_hosts_to(&path, &entries).map_err(|e| e.to_string())?;
+    try_write_or_elevate(&path, &entries)?;
     Ok(())
 }
 
@@ -45,7 +46,7 @@ pub fn toggle_entry(name: String) -> Result<(), String> {
         _ => format!("Failed to toggle entry: {}", e),
     })?;
 
-    write_hosts_to(&path, &entries).map_err(|e| e.to_string())?;
+    try_write_or_elevate(&path, &entries)?;
     Ok(())
 }
 
@@ -60,6 +61,6 @@ pub fn edit_entry(old_name: String, new_ip: IpAddr, new_name: String) -> Result<
         _ => format!("Failed to edit entry: {}", e),
     })?;
 
-    write_hosts_to(&path, &entries).map_err(|e| e.to_string())?;
+    try_write_or_elevate(&path, &entries)?;
     Ok(())
 }

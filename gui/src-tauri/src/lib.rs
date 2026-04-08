@@ -1,4 +1,5 @@
 mod command;
+mod elevation;
 
 use command::{add_entry, edit_entry, get_entries, remove_entry, toggle_entry};
 
