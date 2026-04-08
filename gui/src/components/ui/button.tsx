@@ -26,6 +26,7 @@ export const button = tv({
       surface: [
         "rounded-lg bg-surface-container-low text-on-surface-variant",
         "hover:bg-surface-container",
+        "cursor-pointer",
       ],
     },
     size: {
