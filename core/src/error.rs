@@ -14,7 +14,7 @@ impl fmt::Display for HostCraftError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             HostCraftError::Io(e) => write!(f, "IO error: {}", e),
-            HostCraftError::PermissionDenied(msg) => write!(f, "Permission denied: {}", msg),
+            HostCraftError::PermissionDenied(msg) => write!(f, "{}", msg),
             HostCraftError::UnsupportedPlatform(os) => write!(f, "Unsupported platform: {}", os),
             HostCraftError::DuplicateEntry => write!(f, "You have inserted a duplicate entry."),
             HostCraftError::EntryNotFound => write!(f, "Please check the name and try again."),
