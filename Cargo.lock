@@ -1607,13 +1607,13 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
 name = "hostcraft-cli"
-version = "1.2.1"
+version = "2.0.1"
 dependencies = [
  "anstream",
  "anstyle",
  "clap",
  "directories",
- "hostcraft-core 0.1.8",
+ "hostcraft-core 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "semver",
  "serde",
  "ureq",
@@ -1621,9 +1621,7 @@ dependencies = [
 
 [[package]]
 name = "hostcraft-core"
-version = "0.1.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d0f6293798139cd810067877517a03fd094d524d9277d9923341f4118f12084"
+version = "1.1.1"
 dependencies = [
  "regex",
  "serde",
@@ -1631,7 +1629,9 @@ dependencies = [
 
 [[package]]
 name = "hostcraft-core"
-version = "1.0.0"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95e16945d4915c300b3daa01f05b8b1fd5114fe78dc4c432947b2bced5a49b65"
 dependencies = [
  "regex",
  "serde",
@@ -1641,13 +1641,14 @@ dependencies = [
 name = "hostcraft-gui"
 version = "0.1.0"
 dependencies = [
- "hostcraft-core 0.1.8",
+ "hostcraft-core 1.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
+ "winresource",
 ]
 
 [[package]]
@@ -4344,6 +4345,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "1.1.2+spec-1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "81f3d15e84cbcd896376e6730314d59fb5a87f31e4b038454184435cd57defee"
+dependencies = [
+ "indexmap 2.13.1",
+ "serde_core",
+ "serde_spanned 1.1.1",
+ "toml_datetime 1.1.1+spec-1.1.0",
+ "toml_parser",
+ "toml_writer",
+ "winnow 1.0.1",
+]
+
+[[package]]
 name = "toml_datetime"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5469,6 +5485,16 @@ checksum = "cb5a765337c50e9ec252c2069be9bf91c7df47afb103b642ba3a53bf8101be97"
 dependencies = [
  "cfg-if",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "winresource"
+version = "0.1.31"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0986a8b1d586b7d3e4fe3d9ea39fb451ae22869dcea4aa109d287a374d866087"
+dependencies = [
+ "toml 1.1.2+spec-1.1.0",
+ "version_check",
 ]
 
 [[package]]

@@ -35,7 +35,6 @@ pub fn write_hosts_to(path: &Path, entries: &[HostEntry]) -> Result<()> {
         } else {
             HostCraftError::Io(e)
         }
-        .into()
     })
 }
 
