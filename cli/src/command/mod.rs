@@ -32,7 +32,7 @@ pub enum Command {
         ip: IpAddr,
     },
 
-    /// Edit a host entry (full match supported)
+    /// Edit a host entry (exact match supported)
     Edit {
         /// The hostname to edit (e.g. myapp.local)
         old_name: String,
