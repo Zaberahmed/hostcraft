@@ -32,7 +32,6 @@
     --chart-5: #cfe6f2;
     --radius: 0.5rem;
 
-    /* Sidebar tokens — surface-container-low as background, no border */
     --sidebar: #eff4f7;
     --sidebar-foreground: #283439;
     --sidebar-primary: #0061a4;
@@ -44,35 +43,109 @@
 }
 
 .dark {
-    --background: #0b0f10;
-    --foreground: #e2eaed;
-    --card: #151c1f;
-    --card-foreground: #e2eaed;
-    --popover: #151c1f;
-    --popover-foreground: #e2eaed;
-    --primary: #4ea5fa;
-    --primary-foreground: #003258;
-    --secondary: #8faab5;
-    --secondary-foreground: #0b0f10;
-    --muted: #1c2628;
-    --muted-foreground: #8faab5;
-    --accent: #1c2628;
-    --accent-foreground: #e2eaed;
-    --destructive: #fe8983;
-    --border: rgba(167, 180, 186, 0.1);
-    --input: rgba(167, 180, 186, 0.1);
-    --ring: #4ea5fa;
-    --sidebar: #111617;
-    --sidebar-foreground: #e2eaed;
-    --sidebar-primary: #4ea5fa;
-    --sidebar-primary-foreground: #003258;
-    --sidebar-accent: #1c2628;
-    --sidebar-accent-foreground: #e2eaed;
-    --sidebar-border: transparent;
-    --sidebar-ring: #4ea5fa;
+    /* ── Shadcn semantic tokens (Figma / slate-scale aligned) ──── */
+    --background: #020617; /* slate-950  — page canvas */
+    --card: #0f172a; /* slate-900  — cards, panels */
+    --card-foreground: #f1f5f9; /* slate-100  — card headings */
+    --popover: #0f172a;
+    --popover-foreground: #f1f5f9;
+    --foreground: #e2e8f0; /* slate-200  — body text */
+    --muted: #1e293b; /* slate-800  — chip fills, recessed bg */
+    --muted-foreground: #64748b; /* slate-500  — meta, placeholders */
+    --accent: rgba(30, 58, 138, 0.2); /* blue-900/20 — active nav bg */
+    --accent-foreground: #60a5fa; /* blue-400   — active nav text & icon */
+    --primary: #60a5fa; /* blue-400 */
+    --primary-foreground: #ffffff;
+    --secondary: #1e293b; /* slate-800 */
+    --secondary-foreground: #e2e8f0;
+    --border: #1e293b; /* slate-800  — card & section borders */
+    --input: #334155; /* slate-700  — input borders */
+    --ring: #60a5fa; /* blue-400   — focus ring */
+    --destructive: #f87171; /* red-400 */
+    --chart-1: #60a5fa;
+    --chart-2: #94a3b8;
+    --chart-3: #a5b4fc;
+    --chart-4: #1e3a8a;
+    --chart-5: #1e293b;
+
+    /* ── Sidebar tokens ─────────────────────────────────────────── */
+    --sidebar: #0f172a;
+    --sidebar-foreground: #e2e8f0;
+    --sidebar-primary: #60a5fa;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1e293b; /* slate-800  — nav hover bg */
+    --sidebar-accent-foreground: #e2e8f0;
+    --sidebar-border: rgba(30, 41, 59, 0.4); /* slate-800/40 — right edge */
+    --sidebar-ring: #60a5fa;
+
+    /* ── Design-system: Surface hierarchy ──────────────────────── */
+    --color-surface: #020617; /* slate-950  — page bg */
+    --color-surface-bright: #1e293b;
+    --color-surface-dim: #020617;
+    --color-surface-tint: #60a5fa;
+    --color-surface-variant: #1e293b;
+    --color-surface-container-lowest: #020617;
+    --color-surface-container-low: #0f172a; /* slate-900  — cards, sidebar */
+    --color-surface-container: #1e293b; /* slate-800  — hover, muted bg */
+    --color-surface-container-high: #1e293b;
+    --color-surface-container-highest: #334155; /* slate-700  — elevated hover */
+    --color-inverse-surface: #f1f5f9;
+    --color-inverse-on-surface: #1e293b;
+
+    /* ── Design-system: On-surface ─────────────────────────────── */
+    --color-on-surface: #e2e8f0; /* slate-200  — body text */
+    --color-on-surface-variant: #94a3b8; /* slate-400  — secondary / inactive */
+    --color-on-background: #e2e8f0;
+
+    /* ── Design-system: Primary palette ────────────────────────── */
+    --color-on-primary: #ffffff;
+    --color-primary-dim: #3b82f6; /* blue-500 — gradient end */
+    --color-primary-container: rgba(30, 58, 138, 0.2); /* blue-900/20 */
+    --color-on-primary-container: #60a5fa; /* blue-400 */
+    --color-primary-fixed: #1e3a8a;
+    --color-primary-fixed-dim: rgba(30, 58, 138, 0.35); /* badge bg */
+    --color-on-primary-fixed: #93c5fd; /* blue-300 */
+    --color-on-primary-fixed-variant: #60a5fa;
+    --color-inverse-primary: #2563eb; /* blue-600 */
+
+    /* ── Design-system: Secondary palette ──────────────────────── */
+    --color-secondary-dim: #94a3b8;
+    --color-secondary-container: #1e293b;
+    --color-on-secondary: #e2e8f0;
+    --color-on-secondary-container: #94a3b8; /* slate-400 */
+    --color-secondary-fixed: #1e293b;
+    --color-secondary-fixed-dim: #1e293b; /* slate-800 — badge secondary bg */
+    --color-on-secondary-fixed: #94a3b8;
+    --color-on-secondary-fixed-variant: #64748b;
+
+    /* ── Design-system: Tertiary palette ───────────────────────── */
+    --color-tertiary: #a5b4fc; /* indigo-300 */
+    --color-tertiary-dim: #818cf8;
+    --color-tertiary-container: rgba(49, 46, 129, 0.4); /* indigo-900/40 */
+    --color-on-tertiary: #ffffff;
+    --color-on-tertiary-container: #a5b4fc;
+    --color-tertiary-fixed: rgba(49, 46, 129, 0.3);
+    --color-tertiary-fixed-dim: rgba(49, 46, 129, 0.3); /* badge tertiary bg */
+    --color-on-tertiary-fixed: #a5b4fc;
+    --color-on-tertiary-fixed-variant: #818cf8;
+
+    /* ── Design-system: Outline ─────────────────────────────────── */
+    --color-outline: #64748b; /* slate-500 */
+    --color-outline-variant: #475569; /* slate-600 */
+
+    /* ── Design-system: Error palette ──────────────────────────── */
+    --color-error-dim: #fca5a5; /* red-300 — error text */
+    --color-error-container: rgba(
+        239,
+        68,
+        68,
+        0.12
+    ); /* red/12  — error input bg */
+    --color-on-error: #ffffff;
+    --color-on-error-container: #fca5a5;
 }
 
-@theme inline {
+@theme {
     /* ── Core font stack ─────────────────────────────────────── */
     --font-sans: "Inter Variable", sans-serif;
     --font-heading: var(--font-sans);
@@ -208,6 +281,12 @@
 /* ── Glassmorphism panel ─────────────────────────────────── */
 .glass-panel {
     background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.dark .glass-panel {
+    background: rgba(15, 23, 42, 0.88);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
