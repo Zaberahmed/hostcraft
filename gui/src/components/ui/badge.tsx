@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { tv, VariantProps } from "tailwind-variants";
 
@@ -11,11 +12,12 @@ const badge = tv({
       "tertiary-container": "bg-tertiary-container text-on-tertiary-container",
       "secondary-container":
         "bg-secondary-container text-on-secondary-container",
+      ghost: "bg-transparent text-on-surface-variant border shadow-xs",
     },
     size: {
       default: "px-2 py-0.5 text-[10.5px]",
       md: "px-3 py-1 text-xs",
-      sm: "px-2 py-0.5 text-[10.5px]",
+      sm: "px-2 py-0.5 text-[11px]",
     },
     shape: {
       rounded: "rounded-md",
@@ -24,20 +26,26 @@ const badge = tv({
     isBeta: {
       true: "uppercase",
     },
+    isActive: {
+      true: "bg-secondary-container text-on-secondary-container",
+    },
   },
   defaultVariants: {
     color: "default",
     size: "default",
     shape: "rounded",
+    isBeta: false,
   },
 });
 
 export const Badge = ({
   children,
   variants,
+  className,
 }: {
   children: ReactNode;
   variants: VariantProps<typeof badge>;
+  className?: string;
 }) => {
-  return <span className={badge(variants)}> {children}</span>;
+  return <span className={cn(badge(variants), className)}> {children}</span>;
 };
