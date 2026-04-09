@@ -7,7 +7,7 @@ export const button = tv({
   variants: {
     variant: {
       primary: [
-        "text-on-primary rounded-xl",
+        "rounded-xl text-on-primary",
         "bg-linear-to-r from-primary to-primary-dim",
         "hover:brightness-105",
         "active:scale-[0.98]",
@@ -28,9 +28,15 @@ export const button = tv({
         "hover:bg-surface-container",
         "cursor-pointer",
       ],
+      text: [
+        "rounded text-on-primary-fixed",
+        "hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+        "cursor-pointer",
+      ],
     },
     size: {
       icon: "p-2",
+      xs: "text-xs",
       sm: "px-5 py-2.5 text-sm gap-2",
       md: "px-5 py-2 text-sm gap-2",
       full: "w-full py-3 text-sm gap-2",
@@ -42,7 +48,11 @@ export const button = tv({
     duration: {
       lg: "duration-300",
     },
+    isActive: {
+      true: "bg-primary-container text-on-primary-container hover:bg-primary-container",
+    },
   },
+
   defaultVariants: {
     variant: "ghost",
     size: "sm",
@@ -54,10 +64,13 @@ interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>, ButtonVariants {}
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, size, shadow, duration, className, ...props }, ref) => (
+  ({ variant, size, shadow, duration, isActive, className, ...props }, ref) => (
     <button
       ref={ref}
-      className={cn(button({ variant, size, shadow, duration }), className)}
+      className={cn(
+        button({ variant, size, shadow, duration, isActive }),
+        className,
+      )}
       {...props}
     />
   ),
