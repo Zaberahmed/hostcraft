@@ -31,18 +31,13 @@ export function Navigation() {
             return (
               <div
                 key={item.path}
-                className={cn(
-                  "group relative flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 active:scale-[0.98] opacity-50 cursor-not-allowed",
-                  isActive
-                    ? "bg-primary-container text-on-primary-container"
-                    : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface",
-                )}
+                className="group relative flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 opacity-50 cursor-not-allowed text-on-surface-variant"
               >
                 <Icon
                   icon={item.icon}
                   size={18}
-                  strokeWidth={isActive ? 2 : 1.5}
-                  className={"transition-colors"}
+                  strokeWidth={1.5}
+                  className="transition-colors text-on-surface-variant"
                 />
                 <span className="font-headline tracking-tight">
                   {item.label}

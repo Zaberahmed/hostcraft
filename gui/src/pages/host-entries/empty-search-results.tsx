@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import type { FilterKey } from "@/constants/filters.constant";
 import { TaskRemove02Icon } from "@hugeicons/core-free-icons";
@@ -40,12 +41,15 @@ export function EmptySearchResults({
         />
       </div>
       <p className="text-sm font-semibold text-on-surface-variant">{message}</p>
-      <p
-        className="text-xs text-on-primary-fixed mt-1.5 cursor-pointer"
+      <Button
+        type="button"
+        variant="text"
+        size="xs"
         onClick={onClear}
+        className="mt-1.5"
       >
         Clear filters
-      </p>
+      </Button>
     </div>
   );
 }

@@ -18,6 +18,7 @@ export default function HostEntries() {
     cycleSortOrder,
     activeFilter,
     setActiveFilter,
+    isFiltered,
   } = useEntriesView(entries);
 
   const handleQueryClear = () => {
@@ -44,12 +45,14 @@ export default function HostEntries() {
         onFilterChange={setActiveFilter}
         sortOrder={sortOrder}
         onSortCycle={cycleSortOrder}
+        isResettable={isFiltered}
+        onReset={handleQueryClear}
       />
 
       <div className="space-y-2">
         {entries.length === 0 ? (
           <EmptyEntries />
-        ) : filteredEntries.length == 0 ? (
+        ) : filteredEntries.length === 0 ? (
           <EmptySearchResults
             searchQuery={searchQuery}
             activeFilter={activeFilter}

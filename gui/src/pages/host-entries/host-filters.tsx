@@ -5,6 +5,7 @@ import { Icon } from "@/components/ui/icon";
 import { type FilterKey, Filters } from "@/constants/filters.constant";
 import { Search01Icon } from "@hugeicons/core-free-icons";
 import { getFilterIcon, getSortIcon } from "./utils";
+import { ResetButton } from "@/components/reset-button";
 
 type HostFiltersProps = {
   searchQuery: string;
@@ -13,6 +14,8 @@ type HostFiltersProps = {
   onFilterChange: (f: FilterKey) => void;
   sortOrder: "asc" | "desc" | null;
   onSortCycle: () => void;
+  isResettable: boolean;
+  onReset: () => void;
 };
 
 export function HostFilters({
@@ -22,12 +25,13 @@ export function HostFilters({
   onFilterChange,
   sortOrder,
   onSortCycle,
+  isResettable,
+  onReset,
 }: HostFiltersProps) {
   const [filterToggled, setFilterToggled] = useState(false);
 
   const onToggleFilter = () => {
     setFilterToggled(!filterToggled);
-    onFilterChange("all");
   };
 
   return (
@@ -43,13 +47,25 @@ export function HostFilters({
         )}
 
         {/* Filter */}
-        <Button size="icon" variant="surface" onClick={onToggleFilter}>
+        <Button
+          size="icon"
+          variant="surface"
+          onClick={onToggleFilter}
+          isActive={filterToggled}
+        >
           <Icon icon={getFilterIcon(filterToggled)} size={18} />
         </Button>
         {/* Sort */}
-        <Button size="icon" variant="surface" onClick={onSortCycle}>
+        <Button
+          size="icon"
+          variant="surface"
+          onClick={onSortCycle}
+          isActive={sortOrder !== null}
+        >
           <Icon icon={getSortIcon(sortOrder)} size={18} />
         </Button>
+        {/* Reset */}
+        <ResetButton isResetting={isResettable} onClick={onReset} />
       </div>
     </div>
   );
@@ -96,10 +112,11 @@ const FilterKeys = ({
   return (
     <div className="flex items-center gap-1.5 transition-all duration-200 ease-in-out overflow-hidden">
       {Filters.map((filter) => (
-        <div
+        <button
           key={filter.key}
           onClick={() => onFilterChange(filter.key)}
-          className={`cursor-pointer ${activeFilter === filter.key ? "active" : ""}`}
+          type="button"
+          aria-pressed={activeFilter === filter.key}
         >
           <Badge
             variants={{
@@ -110,7 +127,7 @@ const FilterKeys = ({
           >
             {filter.label}
           </Badge>
-        </div>
+        </button>
       ))}
     </div>
   );
