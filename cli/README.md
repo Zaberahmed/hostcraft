@@ -18,7 +18,7 @@ A fast, cross-platform CLI for managing your system hosts file — add, remove, 
 | Component | Description | Status | Link |
 |---|---|---|---|
 | `hostcraft-core` | Shared library | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-core) |
-| `hostcraft-cli` | Terminal interface (this crate) | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-cli) |
+| `hostcraft-cli` | Terminal interface (this crate) | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-cli) and [Releases](https://github.com/Zaberahmed/hostcraft/releases/tag/cli-v2.1.1) |
 | `hostcraft-gui` | Desktop GUI (Tauri) | 🟡 Beta | [Releases](https://github.com/Zaberahmed/hostcraft/releases) |
 
 ---
@@ -57,7 +57,7 @@ irm https://raw.githubusercontent.com/Zaberahmed/hostcraft/main/install.ps1 | ie
 
 ### Manual download
 
-Download the archive for your platform from the [latest release](https://github.com/Zaberahmed/hostcraft/releases?q=cli-v), extract it, and move the binary to any directory on your `PATH`.
+Download the archive for your platform from the [latest release](https://github.com/Zaberahmed/hostcraft/releases/tag/cli-v2.1.1), extract it, and move the binary to any directory on your `PATH`.
 
 | Platform | File |
 |---|---|
