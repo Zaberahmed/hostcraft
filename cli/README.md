@@ -1,33 +1,39 @@
 # hostcraft
 
 [![Crates.io](https://img.shields.io/crates/v/hostcraft-cli)](https://crates.io/crates/hostcraft-cli)
+[![GitHub Release](https://img.shields.io/github/v/release/Zaberahmed/hostcraft?filter=cli-v*&label=release)](https://github.com/Zaberahmed/hostcraft/releases?q=cli-v)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-2024_edition-orange.svg)](https://www.rust-lang.org)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey)](#installation)
 
-A fast, cross-platform CLI for managing your system hosts file — add, remove, toggle, and list host entries directly from your terminal without ever manually editing the file.
+<p align="center">
+  <img src="../assets/cli-demo.png" alt="hostcraft CLI in action" width="700" />
+</p>
+
+A fast, cross-platform CLI for managing your system hosts file — add, remove, toggle, edit, and list host entries directly from your terminal without ever manually editing the file.
 
 ---
 
 ## Ecosystem
 
-| Crate | Description | Status |
-|---|---|---|
-| `hostcraft-core` | Shared library | ✅ Published |
-| `hostcraft-cli` | Terminal interface (this crate) | ✅ Published |
-| `hostcraft-gui` | Desktop GUI (Tauri) | 🚧 Planned |
+| Component | Description | Status | Link |
+|---|---|---|---|
+| `hostcraft-core` | Shared library | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-core) |
+| `hostcraft-cli` | Terminal interface (this crate) | ✅ Published | [crates.io](https://crates.io/crates/hostcraft-cli) |
+| `hostcraft-gui` | Desktop GUI (Tauri) | 🟡 Beta | [Releases](https://github.com/Zaberahmed/hostcraft/releases) |
 
 ---
 
 ## Features
 
 - **List** all host entries with colour-coded active/inactive status
-- **Add** a new entry with an IP address and hostname
+- **Add** a new entry with a hostname and IP address
+- **Edit** an existing entry's hostname, IP, or both in a single command
 - **Remove** entries by full or partial name match
 - **Toggle** entries on/off without deleting them
 - **Update** to the latest version with a single command — `hostcraft update`
 - Background update checks — once every 24 hours, a notice is printed at the end of any command if a newer version is available
 - Entries are never silently lost — disabled entries are preserved as commented-out lines
-- Duplicate entry detection — adding the same IP + hostname twice is rejected
+- Duplicate entry detection — adding the same hostname + IP combination is rejected
 - IPv4 and IPv6 support
 - Cross-platform — works on macOS, Linux, and Windows
 - Coloured, aligned terminal output powered by `anstyle`
@@ -37,23 +43,38 @@ A fast, cross-platform CLI for managing your system hosts file — add, remove, 
 
 ## Installation
 
-### From crates.io (recommended)
+### macOS / Linux
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Zaberahmed/hostcraft/main/install.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/Zaberahmed/hostcraft/main/install.ps1 | iex
+```
+
+### Manual download
+
+Download the archive for your platform from the [latest release](https://github.com/Zaberahmed/hostcraft/releases?q=cli-v), extract it, and move the binary to any directory on your `PATH`.
+
+| Platform | File |
+|---|---|
+| macOS (Apple Silicon + Intel) | `hostcraft-universal-apple-darwin.tar.gz` |
+| Linux x86_64 | `hostcraft-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux ARM64 | `hostcraft-aarch64-unknown-linux-gnu.tar.gz` |
+| Windows x86_64 | `hostcraft-x86_64-pc-windows-msvc.zip` |
+
+### Via Cargo (Rust users)
 
 ```sh
 cargo install hostcraft-cli
 ```
 
-This compiles the binary and places it in `~/.cargo/bin/`, which is on your `PATH` by default after a standard Rust install. Once done, `hostcraft` is available globally from any directory.
+This compiles the binary from source and places it in `~/.cargo/bin/`, which is on your `PATH` by default after a standard Rust installation.
 
-### From source
-
-```sh
-git clone https://github.com/Zaberahmed/hostcraft.git
-cd hostcraft
-cargo install --path cli
-```
-
-### Verify the install
+### Verify
 
 ```sh
 hostcraft --version
@@ -61,14 +82,41 @@ hostcraft --version
 
 ---
 
+## Uninstall
+
+### macOS / Linux
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Zaberahmed/hostcraft/main/uninstall.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/Zaberahamed/hostcraft/main/uninstall.ps1 | iex
+```
+
+The script removes the binary, cleans up the cache directory, and removes the install location from your `PATH`.
+
+### Via Cargo
+
+```sh
+cargo uninstall hostcraft-cli
+```
+
+---
+
 ## Quick Start
 
 ```sh
-# See all current entries in your hosts file
+# See all entries in your hosts file
 hostcraft list
 
 # Add a new entry
 sudo hostcraft add myapp.local 127.0.0.1
+
+# Edit an existing entry
+sudo hostcraft edit myapp.local --new-ip 192.168.1.50
 
 # Disable it temporarily without removing it
 sudo hostcraft toggle myapp.local
@@ -80,7 +128,7 @@ sudo hostcraft remove myapp.local
 hostcraft update
 ```
 
-> **Why sudo?** Your system hosts file is a protected system file. Reading it works without elevated privileges, but any command that writes — `add`, `remove`, `toggle` — requires `sudo` on macOS/Linux or running as Administrator on Windows.
+> **Windows users:** run your terminal as Administrator instead of using `sudo`.
 
 ---
 
@@ -108,7 +156,7 @@ hostcraft list
 
 ---
 
-### `add <name> <ip>`
+### `add <hostname> <ip>`
 
 Adds a new active entry. The entry is immediately written to the hosts file.
 
@@ -118,7 +166,26 @@ sudo hostcraft add staging.myapp.com 192.168.1.50
 sudo hostcraft add mysite.local ::1          # IPv6
 ```
 
-Adding a duplicate (same IP **and** same hostname) is rejected with an error — the file is left unchanged.
+Adding a duplicate (same hostname **and** same IP) is rejected with an error — the file is left unchanged.
+
+---
+
+### `edit <hostname>`
+
+Edits an existing entry's IP address, hostname, or both in a single command. Requires an exact hostname match (unlike `remove` and `toggle` which accept partial matches).
+
+```sh
+# Change only the IP
+sudo hostcraft edit myapp.local --new-ip 192.168.1.50
+
+# Change only the hostname
+sudo hostcraft edit myapp.local --new-name myapp.dev
+
+# Change both at once
+sudo hostcraft edit myapp.local --new-ip 192.168.1.50 --new-name myapp.dev
+```
+
+At least one of `--new-ip` or `--new-name` must be provided. Returns an error if no entry is found with that exact hostname, or if the supplied values are identical to the current ones.
 
 ---
 
@@ -160,7 +227,7 @@ Supports partial name matching — `hostcraft toggle myapp` toggles all entries 
 
 ### `update`
 
-Checks crates.io for a newer version of hostcraft and installs it automatically if one is available.
+Checks GitHub for a newer version and updates the binary in place if one is available.
 
 ```sh
 hostcraft update
@@ -169,22 +236,22 @@ hostcraft update
 If already on the latest version:
 
 ```
-✓ hostcraft is up to date (v1.0.1)
+✓ hostcraft is up to date (v2.1.0)
 ```
 
-If a newer version is found, it runs `cargo install hostcraft-cli` under the hood and streams cargo's progress live to your terminal, then confirms when done:
+If a newer version is found, it downloads the pre-built binary for your platform, replaces the current executable, and confirms:
 
 ```
-↑ Updating v1.0.1 → v1.1.0 ...
-   Compiling hostcraft-cli v1.1.0
-   ...
-✓ Updated to v1.1.0
+↑ Updating v2.1.0 → v2.2.0 ...
+✓ Updated to v2.2.0
 ```
+
+> **Note:** On macOS/Linux, if hostcraft was installed to a root-owned location like `/usr/local/bin`, run `sudo hostcraft update`.
 
 > **Passive notices:** hostcraft also checks for updates silently in the background once every 24 hours. If a newer version is found, a notice is printed at the end of whatever command you ran:
 >
 > ```
-> ↑ Update available: v1.0.1 → v1.1.0
+> ↑ Update available: v2.1.0 → v2.2.0
 >   Run `hostcraft update` to install.
 > ```
 >
@@ -235,6 +302,7 @@ Prefix write commands with `sudo`:
 
 ```sh
 sudo hostcraft add myapp.local 127.0.0.1
+sudo hostcraft edit myapp.local --new-ip 192.168.1.50
 sudo hostcraft remove myapp.local
 sudo hostcraft toggle myapp.local
 ```
@@ -251,6 +319,7 @@ Run your terminal (Command Prompt or PowerShell) **as Administrator**, then use 
 
 ```sh
 hostcraft add myapp.local 127.0.0.1
+hostcraft edit myapp.local --new-ip 192.168.1.50
 hostcraft remove myapp.local
 hostcraft toggle myapp.local
 ```
@@ -284,7 +353,7 @@ cargo run --bin hostcraft -- add myapp.local 127.0.0.1
 cargo run --bin hostcraft -- --file ./cli/hosts-copy list
 ```
 
-### Re-installing after changes
+### Reinstalling after changes
 
 If you've installed via `cargo install` and made local changes, reinstall to pick them up:
 
@@ -299,8 +368,8 @@ hostcraft/
 ├── core/                  # hostcraft-core — shared library
 │   └── src/
 │       ├── host/          # HostEntry, HostStatus, HostError + operations
-│       │   ├── mod.rs     # Public API: parse_contents, add_entry, remove_entry, toggle_entry
-│       │   └── utils.rs   # Internal: parse_line, is_duplicate_entry
+│       │   ├── mod.rs     # Public API: parse_contents, add_entry, remove_entry, toggle_entry, edit_entry
+│       │   └── utils.rs   # Internal helpers
 │       └── file/          # File I/O
 │           ├── mod.rs     # Public API: read_file, write_file
 │           └── utils.rs   # Internal: write_entries
@@ -309,14 +378,13 @@ hostcraft/
     └── src/
         ├── main.rs           # Entry point — parses args, wires background update check
         ├── command/
-        │   ├── mod.rs        # CLI definition (Cli, Command) + run() dispatch
-        │   └── utils.rs      # Write helpers with permission-aware error messages
+        │   └── mod.rs        # CLI definition (Cli, Command) + run() dispatch
         ├── display/
         │   ├── mod.rs        # Coloured output — all print functions
-        │   └── style.rs      # ANSI style constants (pub(super))
+        │   └── style.rs      # ANSI style constants
         └── update/
-            ├── mod.rs        # Update checker — public API and command handler
-            └── utils.rs      # HTTP fetch, version compare, state file helpers
+            ├── mod.rs        # Update logic — public API and command handler
+            └── utils.rs      # GitHub API, platform detection, binary download + self-replace
 ```
 
 ### Running tests
