@@ -6,7 +6,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 
 export function Footer() {
-  const { theme, toggleTheme } = useThemeContext();
+  const { currentTheme, toggleTheme } = useThemeContext();
   const { openAddModal } = useEntries();
 
   return (
@@ -20,15 +20,18 @@ export function Footer() {
       <div className="border-t border-outline-variant/10">
         {/* Theme toggle */}
         <div className="mt-3 flex items-center gap-2 pr-6">
-          <Toggle checked={theme === "dark"} onChange={toggleTheme} />
+          <Toggle
+            checked={currentTheme?.toLowerCase() === "dark"}
+            onChange={toggleTheme}
+          />
           <Icon
             icon={Sun01Icon}
             altIcon={Moon02Icon}
             size={18}
-            showAlt={theme === "dark"}
+            showAlt={currentTheme?.toLowerCase() === "dark"}
           />
           <span className="text-on-surface font-headline text-sm">
-            {theme === "dark" ? "Dark" : "Light"} mode
+            {currentTheme?.toLowerCase() === "dark" ? "Dark" : "Light"} mode
           </span>
         </div>
       </div>

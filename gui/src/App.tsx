@@ -1,18 +1,23 @@
 import "./App.css";
 import Layout from "@/components/layout";
-import { EntriesProvider } from "@/providers/entries.provider";
-import { ThemeProvider } from "@/providers/theme.provider";
-import { AppRoutes } from "@/routes";
-import { ToastProvider } from "./providers/toast.provider";
+import {
+  EntriesProvider,
+  SettingsProvider,
+  ThemeProvider,
+  ToastProvider,
+} from "@/providers";
+import { AppRoutes } from "./routes";
 
 function App() {
   return (
-    <ThemeProvider>
-      <EntriesProvider>
-        <ToastProvider />
-        <AppRoutes layout={Layout} />
-      </EntriesProvider>
-    </ThemeProvider>
+    <EntriesProvider>
+      <SettingsProvider>
+        <ThemeProvider>
+          <ToastProvider />
+          <AppRoutes layout={Layout} />
+        </ThemeProvider>
+      </SettingsProvider>
+    </EntriesProvider>
   );
 }
 

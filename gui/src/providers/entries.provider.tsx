@@ -34,8 +34,6 @@ interface EntriesContextValue {
   editEntry: (id: string, ip: string, name: string) => void;
   toggleEntry: (name: string) => void;
   deleteEntry: (name: string) => void;
-  cacheBuster: refetchKeys;
-  isLoading: boolean;
 }
 
 const ACCENT_COLORS: AccentColor[] = [
@@ -49,7 +47,6 @@ const EntriesContext = createContext<EntriesContextValue | null>(null);
 
 export function EntriesProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<HostEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
   const [cacheBuster, setCacheBuster] = useState<refetchKeys>({
     entries: new Date(),
@@ -84,8 +81,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchEntries().finally(() => setIsLoading(false));
+    fetchEntries();
   }, [cacheBuster]);
 
   const addEntry = useCallback(
@@ -156,8 +152,6 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         editEntry,
         toggleEntry,
         deleteEntry,
-        cacheBuster,
-        isLoading,
       }}
     >
       {children}
