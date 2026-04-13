@@ -20,6 +20,8 @@ pub fn run() {
         .setup(|app| {
             let settings = setup::load_persistent_settings_or_fallback_to_default(app);
             let settings = setup::load_theme(app, settings);
+            let settings = setup::load_hosts_path(settings);
+
             app.manage(AppState {
                 settings: Mutex::new(settings),
             });

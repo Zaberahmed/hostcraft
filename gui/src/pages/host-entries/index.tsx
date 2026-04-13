@@ -15,16 +15,13 @@ export default function HostEntries() {
     setSearchQuery,
     filteredEntries,
     sortOrder,
+    resetAllFilters,
     cycleSortOrder,
     activeFilter,
     setActiveFilter,
     isFiltered,
   } = useEntriesView(entries);
 
-  const handleQueryClear = () => {
-    setActiveFilter("all");
-    setSearchQuery("");
-  };
   return (
     <div className="px-8 py-6 max-w-6xl mx-auto">
       <Header />
@@ -46,7 +43,7 @@ export default function HostEntries() {
         sortOrder={sortOrder}
         onSortCycle={cycleSortOrder}
         isResettable={isFiltered}
-        onReset={handleQueryClear}
+        onReset={resetAllFilters}
       />
 
       <div className="space-y-2">
@@ -56,7 +53,7 @@ export default function HostEntries() {
           <EmptySearchResults
             searchQuery={searchQuery}
             activeFilter={activeFilter}
-            onClear={handleQueryClear}
+            onClear={resetAllFilters}
           />
         ) : (
           filteredEntries.map((entry) => (

@@ -45,6 +45,12 @@ export function useEntriesView(entries: HostEntry[]) {
     });
   };
 
+  const resetAllFilters = () => {
+    setActiveFilter("all");
+    setSearchQuery("");
+    setSortOrder(null);
+  };
+
   const isFiltered =
     activeFilter !== "all" ||
     debouncedQuery.trim() !== "" ||
@@ -56,6 +62,7 @@ export function useEntriesView(entries: HostEntry[]) {
     activeFilter,
     setActiveFilter,
     sortOrder,
+    resetAllFilters,
     cycleSortOrder,
     filteredEntries,
     isFiltered,

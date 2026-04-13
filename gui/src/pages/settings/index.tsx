@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
+import { useSettingsView } from "@/hooks/use-settings-view";
+import { cn } from "@/lib/utils";
 import {
   MoreIcon,
   SecuredNetworkIcon,
@@ -7,63 +11,16 @@ import {
 } from "@hugeicons/core-free-icons";
 import { SettingRow } from "./setting-row";
 import { SettingSection } from "./setting-section";
-import { Toggle } from "@/components/ui/toggle";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { useSettings } from "@/providers";
 
 export default function Settings() {
-  const { settings, saveSettings, resetSettings } = useSettings();
-  const [dnsValidation, setDnsValidation] = useState(
-    settings?.dns_validation ?? false,
-  );
-  const [isSystemTheme, setIsSystemTheme] = useState(
-    settings?.should_follow_system_theme ?? false,
-  );
-  const [autoReload, setAutoReload] = useState(settings?.auto_reload ?? false);
-  const [showUpdateNotification, setShowUpdateNotification] = useState(
-    settings?.show_update_notifications ?? false,
-  );
-
-  useEffect(() => {
-    setDnsValidation(settings?.dns_validation ?? false);
-    setIsSystemTheme(settings?.should_follow_system_theme ?? false);
-    setAutoReload(settings?.auto_reload ?? false);
-    setShowUpdateNotification(settings?.show_update_notifications ?? false);
-  }, [settings]);
-
-  const handleSave = () => {
-    saveSettings({
-      should_follow_system_theme: isSystemTheme,
-      auto_reload: autoReload,
-      dns_validation: dnsValidation,
-      show_update_notifications: showUpdateNotification,
-    });
-  };
-
-  const isGeneralSectionResettable = useMemo(() => {
-    return (
-      settings?.auto_reload !== autoReload ||
-      settings?.show_update_notifications !== showUpdateNotification ||
-      settings?.should_follow_system_theme !== isSystemTheme
-    );
-  }, [
-    settings?.auto_reload,
-    settings?.show_update_notifications,
-    settings?.should_follow_system_theme,
-    autoReload,
-    showUpdateNotification,
-    isSystemTheme,
-  ]);
-
-  const isNetworkSectionResettable = useMemo(() => {
-    return settings?.dns_validation !== dnsValidation;
-  }, [settings?.dns_validation, dnsValidation]);
-
-  const isDisabled = !(
-    isGeneralSectionResettable || isNetworkSectionResettable
-  );
+  const {
+    handleChange,
+    settingsLocalState,
+    resetState,
+    isSaveDisabled,
+    handleSave,
+    resetSettings,
+  } = useSettingsView();
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
@@ -72,19 +29,28 @@ export default function Settings() {
         <SettingSection
           icon={Settings01Icon}
           title="General"
-          isResettable={isGeneralSectionResettable}
+          isResettable={
+            resetState.find((section) => section.title === "General")
+              ?.shouldReset
+          }
         >
           <SettingRow
             label="Follow system theme"
             description="Toggle to follow the system theme."
           >
-            <Toggle checked={isSystemTheme} onChange={setIsSystemTheme} />
+            <Toggle
+              checked={!!settingsLocalState?.should_follow_system_theme}
+              onChange={(v) => handleChange("should_follow_system_theme", v)}
+            />
           </SettingRow>
           <SettingRow
             label="Auto-reload on save"
             description="Automatically apply host file changes without a manual flush."
           >
-            <Toggle checked={autoReload} onChange={setAutoReload} />
+            <Toggle
+              checked={!!settingsLocalState?.auto_reload}
+              onChange={(v) => handleChange("auto_reload", v)}
+            />
           </SettingRow>
 
           <SettingRow
@@ -93,8 +59,8 @@ export default function Settings() {
           >
             <div className="hidden">
               <Toggle
-                checked={showUpdateNotification}
-                onChange={setShowUpdateNotification}
+                checked={!!settingsLocalState?.show_update_notifications}
+                onChange={(v) => handleChange("show_update_notifications", v)}
               />
             </div>
 
@@ -114,13 +80,19 @@ export default function Settings() {
         <SettingSection
           icon={ServerStack01Icon}
           title="Network"
-          isResettable={isNetworkSectionResettable}
+          isResettable={
+            resetState.find((section) => section.title === "Network")
+              ?.shouldReset
+          }
         >
           <SettingRow
             label="DNS validation"
             description="Warn when a hostname already resolves to a different IP."
           >
-            <Toggle checked={dnsValidation} onChange={setDnsValidation} />
+            <Toggle
+              checked={!!settingsLocalState?.dns_validation}
+              onChange={(v) => handleChange("dns_validation", v)}
+            />
           </SettingRow>
           <SettingRow
             label="Hosts file path"
@@ -128,7 +100,8 @@ export default function Settings() {
           >
             <input
               type="text"
-              defaultValue="/etc/hosts"
+              defaultValue={settingsLocalState?.hosts_path ?? ""}
+              onChange={(e) => handleChange("hosts_path", e.target.value)}
               className={cn(
                 "w-48 rounded-lg text-sm font-label",
                 "px-3 py-1.5",
@@ -209,7 +182,7 @@ export default function Settings() {
           size="sm"
           shadow="lg"
           duration="lg"
-          disabled={isDisabled}
+          disabled={isSaveDisabled}
           onClick={handleSave}
         >
           Save changes

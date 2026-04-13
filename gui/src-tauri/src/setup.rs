@@ -1,5 +1,6 @@
 use crate::command::settings::AppSettings;
 use crate::AppState;
+use hostcraft_core::platform;
 use tauri::{App, Emitter, Manager, Theme};
 use tauri_plugin_store::StoreExt;
 
@@ -23,6 +24,20 @@ pub fn load_theme(app: &mut App, settings: AppSettings) -> AppSettings {
         };
         AppSettings {
             theme: system_theme,
+            ..settings
+        }
+    } else {
+        settings
+    }
+}
+
+pub fn load_hosts_path(settings: AppSettings) -> AppSettings {
+    if settings.hosts_path.is_none() {
+        let path = platform::get_hosts_path()
+            .map(|p| p.to_string_lossy().to_string())
+            .ok();
+        AppSettings {
+            hosts_path: path,
             ..settings
         }
     } else {

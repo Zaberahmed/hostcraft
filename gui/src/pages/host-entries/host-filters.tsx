@@ -31,7 +31,7 @@ export function HostFilters({
   const [filterToggled, setFilterToggled] = useState(false);
 
   const onToggleFilter = () => {
-    setFilterToggled(!filterToggled);
+    setFilterToggled((prev) => !prev);
   };
 
   return (

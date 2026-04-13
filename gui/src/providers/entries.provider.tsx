@@ -34,6 +34,7 @@ interface EntriesContextValue {
   editEntry: (id: string, ip: string, name: string) => void;
   toggleEntry: (name: string) => void;
   deleteEntry: (name: string) => void;
+  refetchEntries: () => void;
 }
 
 const ACCENT_COLORS: AccentColor[] = [
@@ -80,6 +81,10 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refetchEntries = useCallback(() => {
+    setCacheBuster({ entries: new Date() });
+  }, []);
+
   useEffect(() => {
     fetchEntries();
   }, [cacheBuster]);
@@ -89,7 +94,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       try {
         await invoke("add_entry", { ip, name });
         toast.success("Entry added successfully");
-        setCacheBuster({ entries: new Date() });
+        refetchEntries();
         closeModal();
       } catch (error) {
         showErrorToast(error, "Adding");
@@ -111,7 +116,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
           newName: name,
         });
         toast.success("Entry edited successfully");
-        setCacheBuster({ entries: new Date() });
+        refetchEntries();
         closeModal();
       } catch (error) {
         showErrorToast(error, "Editing");
@@ -124,7 +129,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     try {
       await invoke("toggle_entry", { name });
       toast.success("Entry toggled successfully");
-      setCacheBuster({ entries: new Date() });
+      refetchEntries();
     } catch (error) {
       showErrorToast(error, "Toggling");
     }
@@ -134,7 +139,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
     try {
       await invoke("remove_entry", { name });
       toast.success("Entry deleted successfully");
-      setCacheBuster({ entries: new Date() });
+      refetchEntries();
     } catch (error) {
       showErrorToast(error, "Deleting");
     }
@@ -152,6 +157,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         editEntry,
         toggleEntry,
         deleteEntry,
+        refetchEntries,
       }}
     >
       {children}
