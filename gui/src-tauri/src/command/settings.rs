@@ -21,7 +21,7 @@ impl Default for AppSettings {
             auto_reload: false,
             show_update_notifications: false,
             should_follow_system_theme: true,
-            theme: Theme::Light,
+            theme: Theme::Dark,
         }
     }
 }

@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
 
 export const button = tv({
-  base: "inline-flex items-center justify-center transition-all duration-150 font-semibold disabled:opacity-50 disabled:pointer-events-none",
+  base: "inline-flex items-center justify-center transition-all duration-150 font-semibold disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-none",
   variants: {
     variant: {
       primary: [
@@ -26,12 +26,10 @@ export const button = tv({
       surface: [
         "rounded-lg bg-surface-container-low text-on-surface-variant",
         "hover:bg-surface-container",
-        "cursor-pointer",
       ],
       text: [
         "rounded text-on-primary-fixed",
         "hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-        "cursor-pointer",
       ],
     },
     size: {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   MoreIcon,
   SecuredNetworkIcon,
@@ -11,18 +11,69 @@ import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useSettings } from "@/providers";
 
 export default function Settings() {
-  const [dnsValidation, setDnsValidation] = useState(true);
-  const [isSystemTheme, setIsSystemTheme] = useState(false);
-  const [autoReload, setAutoReload] = useState(false);
-  const [showUpdateNotification, setShowUpdateNotification] = useState(false);
+  const { settings, saveSettings, resetSettings } = useSettings();
+  const [dnsValidation, setDnsValidation] = useState(
+    settings?.dns_validation ?? false,
+  );
+  const [isSystemTheme, setIsSystemTheme] = useState(
+    settings?.should_follow_system_theme ?? false,
+  );
+  const [autoReload, setAutoReload] = useState(settings?.auto_reload ?? false);
+  const [showUpdateNotification, setShowUpdateNotification] = useState(
+    settings?.show_update_notifications ?? false,
+  );
+
+  useEffect(() => {
+    setDnsValidation(settings?.dns_validation ?? false);
+    setIsSystemTheme(settings?.should_follow_system_theme ?? false);
+    setAutoReload(settings?.auto_reload ?? false);
+    setShowUpdateNotification(settings?.show_update_notifications ?? false);
+  }, [settings]);
+
+  const handleSave = () => {
+    saveSettings({
+      should_follow_system_theme: isSystemTheme,
+      auto_reload: autoReload,
+      dns_validation: dnsValidation,
+      show_update_notifications: showUpdateNotification,
+    });
+  };
+
+  const isGeneralSectionResettable = useMemo(() => {
+    return (
+      settings?.auto_reload !== autoReload ||
+      settings?.show_update_notifications !== showUpdateNotification ||
+      settings?.should_follow_system_theme !== isSystemTheme
+    );
+  }, [
+    settings?.auto_reload,
+    settings?.show_update_notifications,
+    settings?.should_follow_system_theme,
+    autoReload,
+    showUpdateNotification,
+    isSystemTheme,
+  ]);
+
+  const isNetworkSectionResettable = useMemo(() => {
+    return settings?.dns_validation !== dnsValidation;
+  }, [settings?.dns_validation, dnsValidation]);
+
+  const isDisabled = !(
+    isGeneralSectionResettable || isNetworkSectionResettable
+  );
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <div className="space-y-4">
         {/* General */}
-        <SettingSection icon={Settings01Icon} title="General">
+        <SettingSection
+          icon={Settings01Icon}
+          title="General"
+          isResettable={isGeneralSectionResettable}
+        >
           <SettingRow
             label="Follow system theme"
             description="Toggle to follow the system theme."
@@ -60,7 +111,11 @@ export default function Settings() {
         </SettingSection>
 
         {/* Network */}
-        <SettingSection icon={ServerStack01Icon} title="Network">
+        <SettingSection
+          icon={ServerStack01Icon}
+          title="Network"
+          isResettable={isNetworkSectionResettable}
+        >
           <SettingRow
             label="DNS validation"
             description="Warn when a hostname already resolves to a different IP."
@@ -141,10 +196,22 @@ export default function Settings() {
 
       {/* Save Button */}
       <div className="mt-8 flex justify-end gap-3">
-        <Button variant="subtle" size="sm" duration="lg">
+        <Button
+          variant="subtle"
+          size="sm"
+          duration="lg"
+          onClick={resetSettings}
+        >
           Reset to defaults
         </Button>
-        <Button variant="primary" size="sm" shadow="lg" duration="lg">
+        <Button
+          variant="primary"
+          size="sm"
+          shadow="lg"
+          duration="lg"
+          disabled={isDisabled}
+          onClick={handleSave}
+        >
           Save changes
         </Button>
       </div>
