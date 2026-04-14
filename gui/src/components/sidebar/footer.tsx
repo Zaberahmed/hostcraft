@@ -1,12 +1,12 @@
 import { Icon } from "@/components/ui/icon";
-import { useThemeContext } from "@/providers/theme.provider";
+import { useTheme } from "@/providers/theme.provider";
 import { useEntries } from "@/providers/entries.provider";
 import { Add01Icon, Moon02Icon, Sun01Icon } from "@hugeicons/core-free-icons";
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 
 export function Footer() {
-  const { currentTheme, toggleTheme } = useThemeContext();
+  const { currentTheme, toggleTheme } = useTheme();
   const { openAddModal } = useEntries();
 
   return (

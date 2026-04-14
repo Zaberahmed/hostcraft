@@ -9,13 +9,6 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-export const useThemeContext = () => {
-  const ctx = useContext(ThemeContext);
-  if (!ctx)
-    throw new Error("useThemeContext must be used within ThemeProvider");
-  return ctx;
-};
-
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { settings, saveSettings } = useSettings();
   const currentTheme = settings?.theme;
@@ -36,4 +29,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       <div className={currentTheme}>{children}</div>
     </ThemeContext.Provider>
   );
+};
+
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  return ctx;
 };
