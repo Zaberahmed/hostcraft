@@ -1,4 +1,5 @@
-import type { HostEntry } from "@/entities/host.model";
+import { ACCENT_COLORS } from "@/constants/entries.constant";
+import type { BaseHostEntry, HostEntry } from "@/entities/host.model";
 
 export function activeEntriesCount(entries: HostEntry[]): number {
   return entries.filter((entry) => entry.enabled).length;
@@ -26,4 +27,17 @@ export function isValidHostname(value: string): boolean {
         label.length <= 63 &&
         /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$/.test(label),
     );
+}
+
+export function transformResponse(entries: BaseHostEntry[]): HostEntry[] {
+  return entries.map((entry, index) => {
+    const randomId = crypto.randomUUID();
+    return {
+      ...entry,
+      id: randomId,
+      hostname: entry.name,
+      enabled: entry.status === "Active",
+      accent: ACCENT_COLORS[index % ACCENT_COLORS.length],
+    };
+  });
 }

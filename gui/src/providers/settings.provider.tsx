@@ -1,3 +1,6 @@
+import type { AppSettings, Theme } from "@/entities/settings.model";
+import { useTauriCommands } from "@/hooks/use-tauri-commands";
+import { listen } from "@tauri-apps/api/event";
 import {
   createContext,
   ReactNode,
@@ -5,10 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { toast } from "sonner";
-import type { AppSettings, Theme } from "@/entities/settings.model";
-import { listen } from "@tauri-apps/api/event";
 
 interface refetchKeys {
   settings: Date;
@@ -28,9 +28,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     settings: new Date(),
   });
 
+  const { get_settings, save_settings, reset_settings } = useTauriCommands();
+
   const fetchSettings = async () => {
     try {
-      const result = await invoke<AppSettings>("get_settings");
+      const result = await get_settings();
       console.log("settings", result);
       setSettings(result);
     } catch (error) {
@@ -42,9 +44,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     fetchSettings();
   }, [cacheBuster]);
 
-  const saveSettings = async (setting: Partial<AppSettings>) => {
+  const saveSettings = async (newSettings: Partial<AppSettings>) => {
     try {
-      await invoke("save_settings", { settings: { ...settings, ...setting } });
+      await save_settings({ ...settings, ...newSettings });
       setCacheBuster({ settings: new Date() });
     } catch (error) {
       toast.error("Error while saving settings");
@@ -52,7 +54,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
   const resetSettings = async () => {
     try {
-      await invoke("reset_settings");
+      await reset_settings();
       setCacheBuster({ settings: new Date() });
     } catch (error) {
       toast.error("Error while resetting settings");
@@ -61,7 +63,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unlisten = listen<Theme>("theme-changed", (event) => {
-      // OS changed → update local settings state directly
+      // OS theme changed → update local settings state directly
       setSettings((prev) => (prev ? { ...prev, theme: event.payload } : prev));
     });
     return () => {
