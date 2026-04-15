@@ -31,19 +31,19 @@ pub fn load_theme(app: &mut App, settings: AppSettings) -> AppSettings {
     }
 }
 
-pub fn load_hosts_path(settings: AppSettings) -> AppSettings {
-    if settings.hosts_path.is_none() {
-        let path = platform::get_hosts_path()
-            .map(|p| p.to_string_lossy().to_string())
-            .ok();
-        AppSettings {
-            hosts_path: path,
-            ..settings
-        }
-    } else {
-        settings
-    }
-}
+// pub fn load_hosts_path(settings: AppSettings) -> AppSettings {
+//     if settings.hosts_path.is_default() {
+//         let path = platform::get_hosts_path()
+//             .map(|p| p.to_string_lossy().to_string())
+//             .ok();
+//         AppSettings {
+//             hosts_path: path,
+//             ..settings
+//         }
+//     } else {
+//         settings
+//     }
+// }
 
 pub fn listen_os_changes_for_theme(app: &mut App) {
     let app_handle = app.handle().clone();

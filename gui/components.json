@@ -17,7 +17,12 @@
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/hooks"
+    "hooks": "@/hooks",
+    "entities": "@/entities",
+    "providers": "@/providers",
+    "constants": "@/constants",
+    "assets": "@/assets",
+    "pages": "@/pages"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

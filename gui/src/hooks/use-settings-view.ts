@@ -1,4 +1,4 @@
-import type { AppSettings } from "@/entities/settings.model";
+import type { AppSettings, HostsPath } from "@/entities/settings.model";
 import { useEntries, useSettings } from "@/providers";
 import { isSectionChanged } from "@/utils/settings";
 import { useState, useEffect, useMemo } from "react";
@@ -24,7 +24,15 @@ export function useSettingsView() {
     }
   }, [settings]);
 
-  const handleChange = (key: keyof AppSettings, value: boolean | string) => {
+  const setHostsPathDefault = () =>
+    handleChange("hosts_path", { kind: "default" });
+  const setHostsPathCustom = (value: string) =>
+    handleChange("hosts_path", { kind: "custom", value });
+
+  const handleChange = (
+    key: keyof AppSettings,
+    value: boolean | string | HostsPath,
+  ) => {
     setSettingsLocalState((prev) => {
       if (!prev) return prev;
       return { ...prev, [key]: value };

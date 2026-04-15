@@ -4,10 +4,7 @@ use std::path::PathBuf;
 
 pub fn resolve_path(state: &AppState) -> Result<PathBuf, String> {
     let settings = state.settings.lock().unwrap();
-    match &settings.hosts_path {
-        Some(p) => Ok(PathBuf::from(p)),
-        None => get_hosts_path().map_err(|e| e.to_string()),
-    }
+    settings.hosts_path.resolve().map_err(|e| e.to_string())
 }
 
 pub fn read_file_get_parsed_contents_and_path(
