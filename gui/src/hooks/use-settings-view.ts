@@ -1,8 +1,9 @@
 import type { AppSettings, HostsPath } from "@/entities/settings.model";
 import { useEntries, useSettings } from "@/providers";
-import { isSectionChanged } from "@/utils/settings";
+import { areHostsPathEqual, isSectionChanged } from "@/utils/settings";
 import { useState, useEffect, useMemo } from "react";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { toast } from "sonner";
 
 type SectionTitles = "General" | "Network";
 
@@ -24,11 +25,6 @@ export function useSettingsView() {
     }
   }, [settings]);
 
-  const setHostsPathDefault = () =>
-    handleChange("hosts_path", { kind: "default" });
-  const setHostsPathCustom = (value: string) =>
-    handleChange("hosts_path", { kind: "custom", value });
-
   const handleChange = (
     key: keyof AppSettings,
     value: boolean | string | HostsPath,
@@ -40,8 +36,19 @@ export function useSettingsView() {
   };
 
   const handleSave = async () => {
-    const hasHostPathChanged =
-      settingsLocalState?.hosts_path !== settings?.hosts_path;
+    if (!settingsLocalState) return;
+
+    const hostsPath = settingsLocalState.hosts_path;
+    if (hostsPath.kind === "custom" && !hostsPath.value.trim()) {
+      toast.error("Custom hosts path cannot be empty.");
+      return;
+    }
+
+    const hasHostPathChanged = !areHostsPathEqual(
+      settingsLocalState.hosts_path,
+      settings?.hosts_path,
+    );
+
     if (hasHostPathChanged) {
       const confirmation = await confirm(
         "Are you sure you want to change the hosts path?",
@@ -49,13 +56,13 @@ export function useSettingsView() {
       );
       if (!confirmation) return;
     }
+
     saveSettings({
-      should_follow_system_theme:
-        settingsLocalState?.should_follow_system_theme,
-      auto_reload: settingsLocalState?.auto_reload,
-      dns_validation: settingsLocalState?.dns_validation,
-      show_update_notifications: settingsLocalState?.show_update_notifications,
-      hosts_path: settingsLocalState?.hosts_path,
+      should_follow_system_theme: settingsLocalState.should_follow_system_theme,
+      auto_reload: settingsLocalState.auto_reload,
+      dns_validation: settingsLocalState.dns_validation,
+      show_update_notifications: settingsLocalState.show_update_notifications,
+      hosts_path: settingsLocalState.hosts_path,
     });
     refetchEntries();
   };

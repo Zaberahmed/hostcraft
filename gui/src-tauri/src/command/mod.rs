@@ -81,16 +81,20 @@ pub fn edit_entry(
 
 #[tauri::command]
 pub fn get_settings(state: State<AppState>) -> Result<AppSettings, String> {
-    Ok(state.settings.lock().unwrap().clone())
+    let mut settings = state.settings.lock().unwrap().clone();
+    settings.normalize_hosts_path();
+    Ok(settings)
 }
 
 // Acquires the Mutex, writes new settings, persists to store via AppHandle.
 #[tauri::command]
 pub fn save_settings(
-    settings: AppSettings,
+    mut settings: AppSettings,
     state: State<'_, AppState>,
     app: AppHandle,
 ) -> Result<(), String> {
+    settings.normalize_hosts_path();
+
     // Update in-memory state
     {
         let mut current = state.settings.lock().unwrap();

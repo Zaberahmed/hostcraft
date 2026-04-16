@@ -1,17 +1,18 @@
 use crate::command::settings::AppSettings;
 use crate::AppState;
-use hostcraft_core::platform;
 use tauri::{App, Emitter, Manager, Theme};
 use tauri_plugin_store::StoreExt;
 
 pub fn load_persistent_settings_or_fallback_to_default(app: &mut App) -> AppSettings {
-    match app.store("settings.json") {
+    let mut settings = match app.store("settings.json") {
         Ok(store) => store
             .get("settings")
             .and_then(|v| serde_json::from_value(v).ok())
             .unwrap_or_default(),
         Err(_) => AppSettings::default(),
-    }
+    };
+    settings.normalize_hosts_path();
+    settings
 }
 
 pub fn load_theme(app: &mut App, settings: AppSettings) -> AppSettings {
@@ -30,20 +31,6 @@ pub fn load_theme(app: &mut App, settings: AppSettings) -> AppSettings {
         settings
     }
 }
-
-// pub fn load_hosts_path(settings: AppSettings) -> AppSettings {
-//     if settings.hosts_path.is_default() {
-//         let path = platform::get_hosts_path()
-//             .map(|p| p.to_string_lossy().to_string())
-//             .ok();
-//         AppSettings {
-//             hosts_path: path,
-//             ..settings
-//         }
-//     } else {
-//         settings
-//     }
-// }
 
 pub fn listen_os_changes_for_theme(app: &mut App) {
     let app_handle = app.handle().clone();

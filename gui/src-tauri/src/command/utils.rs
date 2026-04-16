@@ -1,5 +1,5 @@
 use crate::AppState;
-use hostcraft_core::{file, host, platform::get_hosts_path, HostEntry};
+use hostcraft_core::{file, host, HostEntry};
 use std::path::PathBuf;
 
 pub fn resolve_path(state: &AppState) -> Result<PathBuf, String> {

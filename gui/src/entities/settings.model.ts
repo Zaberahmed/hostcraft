@@ -1,6 +1,8 @@
 export type Theme = "light" | "dark";
 
-export type HostsPath = { kind: "default" } | { kind: "custom"; value: string };
+export type HostsPath =
+  | { kind: "default"; value: string }
+  | { kind: "custom"; value: string };
 
 export interface AppSettings {
   hosts_path: HostsPath;
