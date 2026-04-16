@@ -10,13 +10,27 @@ import { cn } from "@/lib/utils";
 import { SettingRow } from "./setting-row";
 import { SettingSection } from "./setting-section";
 import { Toggle } from "@/components/ui/toggle";
-import { useSettingsView } from "@/hooks/use-settings-view";
-import { useState } from "react";
 import type { AppSettings, HostsPath } from "@/entities/settings.model";
+import type { ResetSection } from "@/hooks/use-settings-view";
 
-export function SettingSections() {
-  const { handleChange, settingsLocalState, resetState } = useSettingsView();
+type SettingSectionsProps = {
+  handleChange: (
+    key: keyof AppSettings,
+    value: boolean | string | HostsPath,
+  ) => void;
+  settingsLocalState: AppSettings | null;
+  resetState: ResetSection[];
+  setHostsPathDefault: () => void;
+  setHostsPathCustom: (value: string) => void;
+};
 
+export function SettingSections({
+  handleChange,
+  settingsLocalState,
+  resetState,
+  setHostsPathDefault,
+  setHostsPathCustom,
+}: SettingSectionsProps) {
   return (
     <div className="space-y-4">
       <GeneralSection
@@ -42,6 +56,8 @@ export function SettingSections() {
           settingsLocalState?.hosts_path ?? { kind: "default", value: "" }
         }
         handleChange={handleChange}
+        setHostsPathDefault={setHostsPathDefault}
+        setHostsPathCustom={setHostsPathCustom}
       />
 
       <SecuritySection />
@@ -123,6 +139,8 @@ export function GeneralSection({
 type NetworkSectionProps = CommonProps & {
   dnsValidation: boolean;
   hosts_path: HostsPath;
+  setHostsPathDefault: () => void;
+  setHostsPathCustom: (value: string) => void;
 };
 
 export function NetworkSection({
@@ -130,11 +148,11 @@ export function NetworkSection({
   handleChange,
   dnsValidation,
   hosts_path,
+  setHostsPathDefault,
+  setHostsPathCustom,
 }: NetworkSectionProps) {
-  const [isDefaultHostPath, setIsDefaultHostPath] = useState(
-    () => hosts_path.kind === "default",
-  );
-  const hostsPathValue = hosts_path.value ?? "";
+  const isDefaultHostPath = hosts_path.kind === "default";
+  const hostsPathValue = hosts_path.value;
   return (
     <SettingSection
       icon={ServerStack01Icon}
@@ -156,26 +174,22 @@ export function NetworkSection({
       >
         <div className="space-y-2">
           <div className="flex w-80 flex-wrap items-center gap-2">
-            <label
-              className="inline-flex items-center gap-2 text-sm font-label text-on-surface"
-              onClick={() => setIsDefaultHostPath(true)}
-            >
+            <label className="inline-flex items-center gap-2 text-sm font-label text-on-surface">
               <input
                 type="radio"
-                name="hosts-path-default-mode"
+                name="hosts-path-mode"
                 checked={isDefaultHostPath}
+                onChange={setHostsPathDefault}
               />
               Use system default
             </label>
 
-            <label
-              className="inline-flex items-center gap-2 text-sm font-label text-on-surface"
-              onClick={() => setIsDefaultHostPath(false)}
-            >
+            <label className="inline-flex items-center gap-2 text-sm font-label text-on-surface">
               <input
                 type="radio"
-                name="hosts-path-custom-mode"
+                name="hosts-path-mode"
                 checked={!isDefaultHostPath}
+                onChange={() => setHostsPathCustom(hostsPathValue)}
               />
               Use custom path
             </label>
@@ -184,12 +198,7 @@ export function NetworkSection({
           <input
             type="text"
             value={hostsPathValue}
-            onChange={(e) =>
-              handleChange("hosts_path", {
-                kind: "custom",
-                value: e.target.value,
-              })
-            }
+            onChange={(e) => setHostsPathCustom(e.target.value)}
             disabled={isDefaultHostPath}
             autoFocus={!isDefaultHostPath}
             className={cn(

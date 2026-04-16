@@ -81,8 +81,7 @@ pub fn edit_entry(
 
 #[tauri::command]
 pub fn get_settings(state: State<AppState>) -> Result<AppSettings, String> {
-    let mut settings = state.settings.lock().unwrap().clone();
-    settings.normalize_hosts_path();
+    let settings = state.settings.lock().unwrap().clone();
     Ok(settings)
 }
 

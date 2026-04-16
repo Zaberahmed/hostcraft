@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 type SectionTitles = "General" | "Network";
 
-type ResetSection = {
+export type ResetSection = {
   id: string;
   title: SectionTitles;
   shouldReset: boolean;
@@ -34,6 +34,18 @@ export function useSettingsView() {
       return { ...prev, [key]: value };
     });
   };
+
+  const setHostsPathDefault = () =>
+    handleChange("hosts_path", {
+      kind: "default",
+      value:
+        settings?.hosts_path.kind === "default"
+          ? settings.hosts_path.value
+          : "",
+    });
+
+  const setHostsPathCustom = (value: string) =>
+    handleChange("hosts_path", { kind: "custom", value });
 
   const handleSave = async () => {
     if (!settingsLocalState) return;
@@ -112,5 +124,7 @@ export function useSettingsView() {
     handleChange,
     handleSave,
     resetState,
+    setHostsPathDefault,
+    setHostsPathCustom,
   };
 }

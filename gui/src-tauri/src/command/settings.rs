@@ -10,7 +10,9 @@ pub enum HostsPath {
         #[serde(default)]
         value: String,
     },
-    Custom { value: String },
+    Custom {
+        value: String,
+    },
 }
 
 impl HostsPath {
@@ -19,10 +21,6 @@ impl HostsPath {
             HostsPath::Default { .. } => platform::get_hosts_path(),
             HostsPath::Custom { value } => Ok(PathBuf::from(value)),
         }
-    }
-
-    pub fn is_default(&self) -> bool {
-        matches!(self, HostsPath::Default { .. })
     }
 
     pub fn normalize_default_value(&mut self) {
