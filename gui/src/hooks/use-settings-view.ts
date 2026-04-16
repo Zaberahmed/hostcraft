@@ -14,7 +14,13 @@ export type ResetSection = {
 };
 
 export function useSettingsView() {
-  const { settings, saveSettings, resetSettings } = useSettings();
+  const {
+    settings,
+    saveSettings,
+    resetSettings,
+    flushDNSCache,
+    openHostsFileExternally,
+  } = useSettings();
   const { refetchEntries } = useEntries();
   const [settingsLocalState, setSettingsLocalState] =
     useState<AppSettings | null>(null);
@@ -126,5 +132,7 @@ export function useSettingsView() {
     resetState,
     setHostsPathDefault,
     setHostsPathCustom,
+    flushDNSCache,
+    openHostsFileExternally,
   };
 }

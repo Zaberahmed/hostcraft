@@ -22,6 +22,8 @@ type SettingSectionsProps = {
   resetState: ResetSection[];
   setHostsPathDefault: () => void;
   setHostsPathCustom: (value: string) => void;
+  flushDNSCache: () => void;
+  openHostsFileExternally: () => void;
 };
 
 export function SettingSections({
@@ -30,6 +32,8 @@ export function SettingSections({
   resetState,
   setHostsPathDefault,
   setHostsPathCustom,
+  flushDNSCache,
+  openHostsFileExternally,
 }: SettingSectionsProps) {
   return (
     <div className="space-y-4">
@@ -62,7 +66,10 @@ export function SettingSections({
 
       <SecuritySection />
 
-      <ExternalSection />
+      <ExternalSection
+        flushDNSCache={flushDNSCache}
+        openHostsFileExternally={openHostsFileExternally}
+      />
     </div>
   );
 }
@@ -251,14 +258,28 @@ export function SecuritySection() {
   );
 }
 
-export function ExternalSection() {
+type ExternalSectionProps = {
+  flushDNSCache: () => void;
+  openHostsFileExternally: () => void;
+};
+
+export function ExternalSection({
+  flushDNSCache,
+  openHostsFileExternally,
+}: ExternalSectionProps) {
   return (
     <SettingSection icon={MoreIcon} title="External">
       <SettingRow
         label="Flush DNS cache"
         description="Flush the DNS cache to ensure changes are applied immediately."
       >
-        <Button variant="primary" size="sm" shadow="lg" duration="lg">
+        <Button
+          variant="primary"
+          size="sm"
+          shadow="lg"
+          duration="lg"
+          onClick={flushDNSCache}
+        >
           Flush
         </Button>
       </SettingRow>
@@ -266,7 +287,13 @@ export function ExternalSection() {
         label="Open in Editor"
         description="Open the hosts file in your default editor."
       >
-        <Button variant="primary" size="sm" shadow="lg" duration="lg">
+        <Button
+          variant="primary"
+          size="sm"
+          shadow="lg"
+          duration="lg"
+          onClick={openHostsFileExternally}
+        >
           Open
         </Button>
       </SettingRow>

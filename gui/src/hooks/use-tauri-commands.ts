@@ -27,6 +27,12 @@ export function useTauriCommands() {
   const reset_settings = async () => {
     return await invoke("reset_settings");
   };
+  const flush_dns_cache = async () => {
+    return await invoke("flush_dns_cache");
+  };
+  const open_hosts_file_externally = async () => {
+    return await invoke("open_hosts_file");
+  };
 
   return {
     get_entries,
@@ -37,5 +43,7 @@ export function useTauriCommands() {
     get_settings,
     save_settings,
     reset_settings,
+    flush_dns_cache,
+    open_hosts_file_externally,
   };
 }

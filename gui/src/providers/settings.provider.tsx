@@ -18,6 +18,8 @@ interface SettingsContextValue {
   settings: AppSettings | null;
   saveSettings: (setting: Partial<AppSettings>) => void;
   resetSettings: () => void;
+  flushDNSCache: () => void;
+  openHostsFileExternally: () => void;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -28,7 +30,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     settings: new Date(),
   });
 
-  const { get_settings, save_settings, reset_settings } = useTauriCommands();
+  const {
+    get_settings,
+    save_settings,
+    reset_settings,
+    flush_dns_cache,
+    open_hosts_file_externally,
+  } = useTauriCommands();
 
   const fetchSettings = async () => {
     try {
@@ -60,6 +68,23 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       toast.error("Error while resetting settings");
     }
   };
+  const flushDNSCache = async () => {
+    try {
+      await flush_dns_cache();
+      toast.success("DNS cache flushed successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error while flushing DNS cache");
+    }
+  };
+
+  const openHostsFileExternally = async () => {
+    try {
+      await open_hosts_file_externally();
+    } catch (error) {
+      toast.error("Error while opening hosts file");
+    }
+  };
 
   useEffect(() => {
     const unlisten = listen<Theme>("theme-changed", (event) => {
@@ -77,6 +102,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         settings,
         saveSettings,
         resetSettings,
+        flushDNSCache,
+        openHostsFileExternally,
       }}
     >
       {children}

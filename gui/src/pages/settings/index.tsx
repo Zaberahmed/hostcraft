@@ -12,6 +12,8 @@ export default function Settings() {
     resetState,
     setHostsPathDefault,
     setHostsPathCustom,
+    flushDNSCache,
+    openHostsFileExternally,
   } = useSettingsView();
 
   return (
@@ -22,6 +24,8 @@ export default function Settings() {
         resetState={resetState}
         setHostsPathDefault={setHostsPathDefault}
         setHostsPathCustom={setHostsPathCustom}
+        flushDNSCache={flushDNSCache}
+        openHostsFileExternally={openHostsFileExternally}
       />
 
       {/* Save Button */}
