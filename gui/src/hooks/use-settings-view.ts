@@ -44,10 +44,7 @@ export function useSettingsView() {
   const setHostsPathDefault = () =>
     handleChange("hosts_path", {
       kind: "default",
-      value:
-        settings?.hosts_path.kind === "default"
-          ? settings.hosts_path.value
-          : "",
+      value: settings?.hosts_path.value ?? "",
     });
 
   const setHostsPathCustom = (value: string) =>

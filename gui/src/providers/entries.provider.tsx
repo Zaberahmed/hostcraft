@@ -61,6 +61,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       setEntries(() => transformResponse(result));
     } catch (error) {
       toast.error("Error while loading host entries");
+      setEntries([]);
     }
   };
 

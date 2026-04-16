@@ -48,6 +48,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refetchSettings = async () => {
+    setCacheBuster({ settings: new Date() });
+  };
+
   useEffect(() => {
     fetchSettings();
   }, [cacheBuster]);
@@ -55,7 +59,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const saveSettings = async (newSettings: Partial<AppSettings>) => {
     try {
       await save_settings({ ...settings, ...newSettings });
-      setCacheBuster({ settings: new Date() });
+      refetchSettings();
     } catch (error) {
       toast.error("Error while saving settings");
     }
@@ -63,7 +67,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const resetSettings = async () => {
     try {
       await reset_settings();
-      setCacheBuster({ settings: new Date() });
+      refetchSettings();
     } catch (error) {
       toast.error("Error while resetting settings");
     }
@@ -73,7 +77,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       await flush_dns_cache();
       toast.success("DNS cache flushed successfully");
     } catch (error) {
-      console.error(error);
       toast.error("Error while flushing DNS cache");
     }
   };

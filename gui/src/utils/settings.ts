@@ -6,10 +6,6 @@ export function isSectionChanged(
   keys: (keyof AppSettings)[],
 ): boolean {
   return keys.some((key) => {
-    if (key === "hosts_path") {
-      return !areHostsPathEqual(saved?.hosts_path, local?.hosts_path);
-    }
-
     const savedValue = saved?.[key];
     const localValue = local?.[key];
     if (
