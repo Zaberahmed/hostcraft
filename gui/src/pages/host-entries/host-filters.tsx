@@ -3,9 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { type FilterKey, Filters } from "@/constants/filters.constant";
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { RedoIcon, Search01Icon } from "@hugeicons/core-free-icons";
 import { getFilterIcon, getSortIcon } from "./utils";
-import { ResetButton } from "@/components/reset-button";
+import { ResetIndicator } from "@/components/ui/reset";
 
 type HostFiltersProps = {
   searchQuery: string;
@@ -31,7 +31,7 @@ export function HostFilters({
   const [filterToggled, setFilterToggled] = useState(false);
 
   const onToggleFilter = () => {
-    setFilterToggled(!filterToggled);
+    setFilterToggled((prev) => !prev);
   };
 
   return (
@@ -55,6 +55,7 @@ export function HostFilters({
         >
           <Icon icon={getFilterIcon(filterToggled)} size={18} />
         </Button>
+
         {/* Sort */}
         <Button
           size="icon"
@@ -64,8 +65,20 @@ export function HostFilters({
         >
           <Icon icon={getSortIcon(sortOrder)} size={18} />
         </Button>
+
         {/* Reset */}
-        <ResetButton isResetting={isResettable} onClick={onReset} />
+        <div className="relative inline-flex">
+          <Button
+            size="icon"
+            variant="surface"
+            onClick={onReset}
+            aria-label={isResettable ? "Reset active" : "Reset inactive"}
+          >
+            <Icon icon={RedoIcon} size={18} />
+          </Button>
+
+          {isResettable && <ResetIndicator />}
+        </div>
       </div>
     </div>
   );
