@@ -2,13 +2,16 @@ pub mod command;
 mod elevation;
 mod setup;
 
-use std::sync::Mutex;
-use tauri::Manager;
-
 use command::settings::AppSettings;
+use notify::RecommendedWatcher;
+use std::sync::Mutex;
+use std::time::Instant;
+use tauri::Manager;
 
 pub struct AppState {
     pub settings: Mutex<AppSettings>,
+    pub hosts_watcher: Mutex<Option<RecommendedWatcher>>,
+    pub suppress_reload_until: Mutex<Option<Instant>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -23,9 +26,12 @@ pub fn run() {
 
             app.manage(AppState {
                 settings: Mutex::new(settings),
+                hosts_watcher: Mutex::new(None),
+                suppress_reload_until: Mutex::new(None),
             });
 
             setup::listen_os_changes_for_theme(app);
+            setup::start_hosts_watcher(app.handle()).ok();
 
             #[cfg(debug_assertions)]
             app.get_webview_window("main").unwrap().open_devtools();
@@ -37,11 +43,12 @@ pub fn run() {
             command::edit_entry,
             command::toggle_entry,
             command::remove_entry,
-            command::get_settings,
-            command::save_settings,
-            command::reset_settings,
-            command::flush_dns_cache,
-            command::open_hosts_file
+            command::settings::get_settings,
+            command::settings::save_settings,
+            command::settings::reset_settings,
+            command::settings::flush_dns_cache,
+            command::settings::open_hosts_file,
+            command::dns::validate_dns,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

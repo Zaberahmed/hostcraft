@@ -1,4 +1,8 @@
-import type { AppSettings, Theme } from "@/entities/settings.model";
+import type {
+  AppSettings,
+  DnsValidationResult,
+  Theme,
+} from "@/entities/settings.model";
 import { useTauriCommands } from "@/hooks/use-tauri-commands";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -20,6 +24,10 @@ interface SettingsContextValue {
   resetSettings: () => void;
   flushDNSCache: () => void;
   openHostsFileExternally: () => void;
+  validateDns: (
+    hostname: string,
+    ip: string,
+  ) => Promise<DnsValidationResult | undefined>;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -36,6 +44,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     reset_settings,
     flush_dns_cache,
     open_hosts_file_externally,
+    validate_dns,
   } = useTauriCommands();
 
   const fetchSettings = async () => {
@@ -89,6 +98,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const validateDns = async (hostname: string, ip: string) => {
+    try {
+      return await validate_dns(hostname, ip);
+    } catch (error) {
+      toast.error("Error while validating DNS");
+    }
+  };
+
   useEffect(() => {
     const unlisten = listen<Theme>("theme-changed", (event) => {
       // OS theme changed → update local settings state directly
@@ -107,6 +124,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         resetSettings,
         flushDNSCache,
         openHostsFileExternally,
+        validateDns,
       }}
     >
       {children}

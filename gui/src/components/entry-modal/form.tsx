@@ -1,31 +1,62 @@
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { useEntries } from "@/providers/entries.provider";
+import { useEntries, useSettings } from "@/providers";
 import { useEffect, useState } from "react";
-import type { FormData } from "./types";
 import { isUnChanged, validate } from "./utils";
+import { confirm } from "@tauri-apps/plugin-dialog";
+import type { FormData } from "./types";
 
 export function EntryForm() {
   const { modal, closeModal, addEntry, editEntry } = useEntries();
+  const { settings, validateDns } = useSettings();
   const isEdit = modal.mode === "edit";
 
   const [formData, setFormData] = useState<FormData>({ ip: "", hostname: "" });
   const [errors, setErrors] = useState<FormData>({ ip: "", hostname: "" });
   const [isDisabled, setIsDisabled] = useState(() => isEdit);
 
-  function handleSubmit(e: React.SubmitEvent) {
-    e.preventDefault();
-    const isValid = validate({
+  const formValidation = () => {
+    return validate({
       formData,
       setErrroCallback: (e) => setErrors(e),
     });
+  };
 
-    if (!isValid) return;
+  const dnsValidation = async (hostname: string, ip: string) => {
+    if (settings?.dns_validation) {
+      const res = await validateDns(hostname, ip);
+
+      if (res?.lookup_failed) {
+        const ok = await confirm(
+          "DNS lookup failed — hostname could not be resolved.\nSave anyway?",
+          { kind: "warning", title: "DNS Lookup Failed" },
+        );
+        if (!ok) return false;
+      }
+
+      if (res?.conflict) {
+        const ok = await confirm(
+          `DNS mismatch detected.\n\nCurrent DNS resolves to: ${res?.resolved_ips.join(", ")}\nYou entered: ${ip}\n\nSave anyway?`,
+          { kind: "warning", title: "DNS Mismatch", okLabel: "Save anyway" },
+        );
+        if (!ok) return false;
+      }
+    }
+    return true;
+  };
+
+  async function handleSubmit(e: React.SubmitEvent) {
+    e.preventDefault();
+    const ip = formData.ip.trim();
+    const hostname = formData.hostname.trim();
+
+    if (!formValidation()) return;
+    if (!(await dnsValidation(hostname, ip))) return;
 
     if (isEdit) {
-      editEntry(modal.entry.id, formData.ip.trim(), formData.hostname.trim());
+      editEntry(modal.entry.id, ip, hostname);
     } else {
-      addEntry(formData.ip.trim(), formData.hostname.trim());
+      addEntry(ip, hostname);
     }
   }
 

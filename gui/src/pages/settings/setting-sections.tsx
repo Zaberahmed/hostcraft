@@ -113,21 +113,10 @@ export function GeneralSection({
         label="Auto-reload on save"
         description="Automatically apply host file changes without a manual flush."
       >
-        <div className="hidden">
-          <Toggle
-            checked={autoReload}
-            onChange={(v) => handleChange("auto_reload", v)}
-          />
-        </div>
-        <Badge
-          variants={{
-            color: "tertiary-container",
-            size: "md",
-            shape: "pill",
-          }}
-        >
-          Coming soon
-        </Badge>
+        <Toggle
+          checked={autoReload}
+          onChange={(v) => handleChange("auto_reload", v)}
+        />
       </SettingRow>
 
       <SettingRow
@@ -181,21 +170,10 @@ export function NetworkSection({
         label="DNS validation"
         description="Warn when a hostname already resolves to a different IP."
       >
-        <div className="hidden">
-          <Toggle
-            checked={dnsValidation}
-            onChange={(v) => handleChange("dns_validation", v)}
-          />
-        </div>
-        <Badge
-          variants={{
-            color: "tertiary-container",
-            size: "md",
-            shape: "pill",
-          }}
-        >
-          Coming soon
-        </Badge>
+        <Toggle
+          checked={dnsValidation}
+          onChange={(v) => handleChange("dns_validation", v)}
+        />
       </SettingRow>
       <SettingRow
         label="Hosts file path"

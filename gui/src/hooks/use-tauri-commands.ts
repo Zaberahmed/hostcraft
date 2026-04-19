@@ -1,5 +1,8 @@
 import type { BaseHostEntry } from "@/entities/host.model";
-import type { AppSettings } from "@/entities/settings.model";
+import type {
+  AppSettings,
+  DnsValidationResult,
+} from "@/entities/settings.model";
 import { invoke } from "@tauri-apps/api/core";
 
 export function useTauriCommands() {
@@ -16,7 +19,7 @@ export function useTauriCommands() {
     return await invoke("toggle_entry", { name });
   };
   const delete_entry = async (name: string) => {
-    return await invoke("delete_entry", { name });
+    return await invoke("remove_entry", { name });
   };
   const get_settings = async () => {
     return await invoke<AppSettings>("get_settings");
@@ -33,6 +36,12 @@ export function useTauriCommands() {
   const open_hosts_file_externally = async () => {
     return await invoke("open_hosts_file");
   };
+  const validate_dns = async (
+    hostname: string,
+    ip: string,
+  ): Promise<DnsValidationResult> => {
+    return await invoke<DnsValidationResult>("validate_dns", { hostname, ip });
+  };
 
   return {
     get_entries,
@@ -45,5 +54,6 @@ export function useTauriCommands() {
     reset_settings,
     flush_dns_cache,
     open_hosts_file_externally,
+    validate_dns,
   };
 }

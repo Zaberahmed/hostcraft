@@ -2,6 +2,7 @@ import type { HostEntry } from "@/entities/host.model";
 import { useTauriCommands } from "@/hooks/use-tauri-commands";
 import { transformResponse } from "@/utils/entries";
 import { showErrorToast } from "@/utils/error";
+import { listen } from "@tauri-apps/api/event";
 import {
   createContext,
   useCallback,
@@ -124,6 +125,15 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
       showErrorToast(error, "Deleting");
     }
   }, []);
+
+  useEffect(() => {
+    const unlisten = listen("hosts-file-changed", () => {
+      refetchEntries();
+    });
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, [refetchEntries]);
 
   return (
     <EntriesContext.Provider
