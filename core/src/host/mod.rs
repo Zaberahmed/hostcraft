@@ -85,27 +85,51 @@ pub fn edit_entry(
     Ok(())
 }
 
-pub fn remove_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<()> {
+pub fn remove_entry(entries: &mut Vec<HostEntry>, name: &str) -> Result<()> {
     let original_len = entries.len();
-    entries.retain(|e| !e.name.contains(partial_name));
+    entries.retain(|e| e.name != name);
     if entries.len() == original_len {
         return Err(HostCraftError::EntryNotFound);
     }
     Ok(())
 }
 
-pub fn toggle_entry(entries: &mut Vec<HostEntry>, partial_name: &str) -> Result<()> {
-    let mut found = false;
+pub fn remove_entries_matching(entries: &mut Vec<HostEntry>, pattern: &str) -> Result<usize> {
+    let original_len = entries.len();
+    entries.retain(|e| !e.name.contains(pattern));
+    let removed = original_len - entries.len();
+    if removed == 0 {
+        return Err(HostCraftError::EntryNotFound);
+    }
+    Ok(removed)
+}
+
+pub fn toggle_entry(entries: &mut Vec<HostEntry>, name: &str) -> Result<()> {
+    let mut toggled = 0;
     for entry in entries.iter_mut() {
-        if entry.name.contains(partial_name) {
+        if entry.name == name {
             entry.toggle();
-            found = true;
+            toggled += 1;
         }
     }
-    if !found {
+    if toggled == 0 {
         return Err(HostCraftError::EntryNotFound);
     }
     Ok(())
+}
+
+pub fn toggle_entries_matching(entries: &mut Vec<HostEntry>, pattern: &str) -> Result<usize> {
+    let mut toggled = 0;
+    for entry in entries.iter_mut() {
+        if entry.name.contains(pattern) {
+            entry.toggle();
+            toggled += 1;
+        }
+    }
+    if toggled == 0 {
+        return Err(HostCraftError::EntryNotFound);
+    }
+    Ok(toggled)
 }
 
 #[cfg(test)]
@@ -252,7 +276,7 @@ mod tests {
     }
 
     #[test]
-    fn remove_entry_partial_name_match_removes_all_matching() {
+    fn remove_entry_partial_name_does_not_remove_entries() {
         let mut entries = vec![
             make_entry(ip(127, 0, 0, 1), "dev.hostcraft.com", HostStatus::Active),
             make_entry(
@@ -263,15 +287,39 @@ mod tests {
             make_entry(ip(10, 0, 0, 1), "unrelated.com", HostStatus::Active),
         ];
         let result = remove_entry(&mut entries, "hostcraft");
-        assert!(result.is_ok());
-        assert_eq!(entries.len(), 1);
-        assert_eq!(entries[0].name, "unrelated.com");
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
+        assert_eq!(entries.len(), 3);
     }
 
     #[test]
     fn remove_entry_no_match_returns_err_and_leaves_entries_unchanged() {
         let mut entries = sample_entries();
         let result = remove_entry(&mut entries, "nonexistent.com");
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
+        assert_eq!(entries.len(), 2);
+    }
+
+    #[test]
+    fn remove_entries_matching_partial_name_removes_all_matching_and_returns_count() {
+        let mut entries = vec![
+            make_entry(ip(127, 0, 0, 1), "dev.hostcraft.com", HostStatus::Active),
+            make_entry(
+                ip(192, 168, 0, 1),
+                "staging.hostcraft.com",
+                HostStatus::Active,
+            ),
+            make_entry(ip(10, 0, 0, 1), "unrelated.com", HostStatus::Active),
+        ];
+        let result = remove_entries_matching(&mut entries, "hostcraft");
+        assert_eq!(result.expect("expected two entries to be removed"), 2);
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].name, "unrelated.com");
+    }
+
+    #[test]
+    fn remove_entries_matching_no_match_returns_err_and_leaves_entries_unchanged() {
+        let mut entries = sample_entries();
+        let result = remove_entries_matching(&mut entries, "nonexistent.com");
         assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
         assert_eq!(entries.len(), 2);
     }
@@ -295,7 +343,7 @@ mod tests {
     }
 
     #[test]
-    fn toggle_entry_partial_match_toggles_all_matching_only() {
+    fn toggle_entry_partial_name_does_not_toggle_entries() {
         let mut entries = vec![
             make_entry(ip(127, 0, 0, 1), "dev.hostcraft.com", HostStatus::Active),
             make_entry(
@@ -306,9 +354,9 @@ mod tests {
             make_entry(ip(10, 0, 0, 1), "unrelated.com", HostStatus::Active),
         ];
         let result = toggle_entry(&mut entries, "hostcraft");
-        assert!(result.is_ok());
-        assert_eq!(entries[0].status, HostStatus::Inactive);
-        assert_eq!(entries[1].status, HostStatus::Inactive);
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
+        assert_eq!(entries[0].status, HostStatus::Active);
+        assert_eq!(entries[1].status, HostStatus::Active);
         assert_eq!(entries[2].status, HostStatus::Active);
     }
 
@@ -316,6 +364,31 @@ mod tests {
     fn toggle_entry_no_match_returns_err() {
         let mut entries = sample_entries();
         let result = toggle_entry(&mut entries, "nonexistent.com");
+        assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
+    }
+
+    #[test]
+    fn toggle_entries_matching_partial_name_toggles_all_matching_and_returns_count() {
+        let mut entries = vec![
+            make_entry(ip(127, 0, 0, 1), "dev.hostcraft.com", HostStatus::Active),
+            make_entry(
+                ip(192, 168, 0, 1),
+                "staging.hostcraft.com",
+                HostStatus::Active,
+            ),
+            make_entry(ip(10, 0, 0, 1), "unrelated.com", HostStatus::Active),
+        ];
+        let result = toggle_entries_matching(&mut entries, "hostcraft");
+        assert_eq!(result.expect("expected two entries to be toggled"), 2);
+        assert_eq!(entries[0].status, HostStatus::Inactive);
+        assert_eq!(entries[1].status, HostStatus::Inactive);
+        assert_eq!(entries[2].status, HostStatus::Active);
+    }
+
+    #[test]
+    fn toggle_entries_matching_no_match_returns_err() {
+        let mut entries = sample_entries();
+        let result = toggle_entries_matching(&mut entries, "nonexistent.com");
         assert!(matches!(result, Err(HostCraftError::EntryNotFound)));
     }
 }

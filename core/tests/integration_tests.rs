@@ -117,6 +117,31 @@ fn remove_then_round_trip_excludes_removed_entry() {
 }
 
 #[test]
+fn remove_matching_then_round_trip_excludes_all_matches_and_returns_count() {
+    let tmp = TempFile::new("remove_matching_round_trip");
+    let mut entries = vec![
+        make_entry(ip(127, 0, 0, 1), "dev.hostcraft.com", HostStatus::Active),
+        make_entry(
+            ip(192, 168, 0, 1),
+            "staging.hostcraft.com",
+            HostStatus::Inactive,
+        ),
+        make_entry(ip(10, 0, 0, 1), "unrelated.com", HostStatus::Active),
+    ];
+
+    let removed =
+        host::remove_entries_matching(&mut entries, "hostcraft").expect("Failed to remove");
+    assert_eq!(removed, 2);
+
+    file::write_file(tmp.path(), &entries).expect("Failed to write");
+    let lines = file::read_file(tmp.path()).expect("Failed to read");
+    let result = host::parse_contents(lines);
+
+    assert_eq!(result.len(), 1);
+    assert_eq!(result[0].name, "unrelated.com");
+}
+
+#[test]
 fn edit_then_round_trip_updates_entry() {
     let tmp = TempFile::new("edit_round_trip");
     let mut entries = vec![
