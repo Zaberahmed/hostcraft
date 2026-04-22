@@ -46,16 +46,24 @@ pub enum Command {
         new_name: Option<String>,
     },
 
-    /// Remove a host entry by name (partial match supported)
+    /// Remove a host entry by name (exact match by default)
     Remove {
-        /// The hostname to remove (partial match supported)
+        /// The hostname to remove
         name: String,
+
+        /// Match by substring and remove all matching entries
+        #[arg(long)]
+        partial: bool,
     },
 
-    /// Toggle a host entry on or off by name (partial match supported)
+    /// Toggle a host entry on or off by name (exact match by default)
     Toggle {
-        /// The hostname to toggle (partial match supported)
+        /// The hostname to toggle
         name: String,
+
+        /// Match by substring and toggle all matching entries
+        #[arg(long)]
+        partial: bool,
     },
 
     /// Check for a newer version and update if one is available
@@ -129,31 +137,77 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn Error>> {
             print_entries(&entries);
         }
 
-        Command::Remove { name } => {
-            host::remove_entry(&mut entries, &name).map_err(|e| match e {
-                HostCraftError::EntryNotFound => {
-                    format!("No entry found matching '{}'. {}", name, e)
-                }
-                _ => format!("Failed to remove entry: {}", e),
-            })?;
+        Command::Remove { name, partial } => {
+            let removed_count = if partial {
+                host::remove_entries_matching(&mut entries, &name).map_err(|e| match e {
+                    HostCraftError::EntryNotFound => {
+                        format!("No entries found containing '{}'. {}", name, e)
+                    }
+                    _ => format!("Failed to remove entry: {}", e),
+                })?
+            } else {
+                host::remove_entry(&mut entries, &name).map_err(|e| match e {
+                    HostCraftError::EntryNotFound => {
+                        format!("No entry found with exact name '{}'. {}", name, e)
+                    }
+                    _ => format!("Failed to remove entry: {}", e),
+                })?;
+                1
+            };
 
             write_hosts_to(&path, &entries).map_err(|e| e.to_string())?;
 
-            print_success(&format!("Removed '{}'", name));
+            if partial {
+                print_success(&format!(
+                    "Removed {} {} containing '{}'",
+                    removed_count,
+                    if removed_count == 1 {
+                        "entry"
+                    } else {
+                        "entries"
+                    },
+                    name
+                ));
+            } else {
+                print_success(&format!("Removed '{}'", name));
+            }
             print_entries(&entries);
         }
 
-        Command::Toggle { name } => {
-            host::toggle_entry(&mut entries, &name).map_err(|e| match e {
-                HostCraftError::EntryNotFound => {
-                    format!("No entry found matching '{}'. {}", name, e)
-                }
-                _ => format!("Failed to toggle entry: {}", e),
-            })?;
+        Command::Toggle { name, partial } => {
+            let toggled_count = if partial {
+                host::toggle_entries_matching(&mut entries, &name).map_err(|e| match e {
+                    HostCraftError::EntryNotFound => {
+                        format!("No entries found containing '{}'. {}", name, e)
+                    }
+                    _ => format!("Failed to toggle entry: {}", e),
+                })?
+            } else {
+                host::toggle_entry(&mut entries, &name).map_err(|e| match e {
+                    HostCraftError::EntryNotFound => {
+                        format!("No entry found with exact name '{}'. {}", name, e)
+                    }
+                    _ => format!("Failed to toggle entry: {}", e),
+                })?;
+                1
+            };
 
             write_hosts_to(&path, &entries).map_err(|e| e.to_string())?;
 
-            print_success(&format!("Toggled '{}'", name));
+            if partial {
+                print_success(&format!(
+                    "Toggled {} {} containing '{}'",
+                    toggled_count,
+                    if toggled_count == 1 {
+                        "entry"
+                    } else {
+                        "entries"
+                    },
+                    name
+                ));
+            } else {
+                print_success(&format!("Toggled '{}'", name));
+            }
             print_entries(&entries);
         }
 
