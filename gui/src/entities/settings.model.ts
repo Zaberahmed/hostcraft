@@ -13,3 +13,9 @@ export interface AppSettings {
   should_follow_system_theme: boolean;
   theme: Theme;
 }
+
+export type DnsValidationResult = {
+  conflict: boolean;
+  lookup_failed: boolean;
+  resolved_ips: string[];
+};
