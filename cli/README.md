@@ -28,8 +28,8 @@ A fast, cross-platform CLI for managing your system hosts file — add, remove, 
 - **List** all host entries with colour-coded active/inactive status
 - **Add** a new entry with a hostname and IP address
 - **Edit** an existing entry's hostname, IP, or both in a single command
-- **Remove** entries by full or partial name match
-- **Toggle** entries on/off without deleting them
+- **Remove** entries by exact name by default, with explicit `--partial` opt-in for bulk matching
+- **Toggle** entries on/off without deleting them, with explicit `--partial` opt-in
 - **Update** to the latest version with a single command — `hostcraft update`
 - Background update checks — once every 24 hours, a notice is printed at the end of any command if a newer version is available
 - Entries are never silently lost — disabled entries are preserved as commented-out lines
@@ -172,7 +172,7 @@ Adding a duplicate (same hostname **and** same IP) is rejected with an error —
 
 ### `edit <hostname>`
 
-Edits an existing entry's IP address, hostname, or both in a single command. Requires an exact hostname match (unlike `remove` and `toggle` which accept partial matches).
+Edits an existing entry's IP address, hostname, or both in a single command. Requires an exact hostname match.
 
 ```sh
 # Change only the IP
@@ -191,23 +191,23 @@ At least one of `--new-ip` or `--new-name` must be provided. Returns an error if
 
 ### `remove <name>`
 
-Removes all entries whose hostname contains the given string. Supports partial matches.
+Removes entries with an exact hostname match by default.
 
 ```sh
 # Remove an exact hostname
 sudo hostcraft remove myapp.local
 
-# Remove all entries matching a substring
-sudo hostcraft remove myapp      # removes myapp.local, myapp.dev, etc.
+# Remove all entries matching a substring (explicit opt-in)
+sudo hostcraft remove myapp --partial      # removes myapp.local, myapp.dev, etc.
 ```
 
-Returns an error if no matching entry is found.
+Returns an error if no matching entry is found. In `--partial` mode, success output includes how many entries were removed.
 
 ---
 
 ### `toggle <name>`
 
-Flips matching entries between active and inactive without removing them. Useful for temporarily disabling a host without losing it.
+Flips entries between active and inactive without removing them. Useful for temporarily disabling a host without losing it.
 
 ```sh
 sudo hostcraft toggle myapp.local
@@ -219,9 +219,12 @@ sudo hostcraft toggle myapp.local
 
 # Before: # 127.0.0.1 myapp.local
 # After:    127.0.0.1 myapp.local
+
+# Toggle all entries matching a substring (explicit opt-in)
+sudo hostcraft toggle myapp --partial
 ```
 
-Supports partial name matching — `hostcraft toggle myapp` toggles all entries whose hostname contains `"myapp"`.
+In `--partial` mode, success output includes how many entries were toggled.
 
 ---
 
@@ -236,13 +239,13 @@ hostcraft update
 If already on the latest version:
 
 ```
-✓ hostcraft is up to date (v2.1.0)
+✓ hostcraft is up to date (v2.2.0)
 ```
 
 If a newer version is found, it downloads the pre-built binary for your platform, replaces the current executable, and confirms:
 
 ```
-↑ Updating v2.1.0 → v2.2.0 ...
+↑ Updating v2.1.1 → v2.2.0 ...
 ✓ Updated to v2.2.0
 ```
 
@@ -251,7 +254,7 @@ If a newer version is found, it downloads the pre-built binary for your platform
 > **Passive notices:** hostcraft also checks for updates silently in the background once every 24 hours. If a newer version is found, a notice is printed at the end of whatever command you ran:
 >
 > ```
-> ↑ Update available: v2.1.0 → v2.2.0
+> ↑ Update available: v2.1.1 → v2.2.0
 >   Run `hostcraft update` to install.
 > ```
 >
@@ -266,6 +269,11 @@ If a newer version is found, it downloads the pre-built binary for your platform
 | `--file <path>` | Platform default (see below) | Override the hosts file path |
 | `--help` | — | Print help for the command or subcommand |
 | `--version` | — | Print the installed version |
+
+Command-specific flags:
+
+- `remove --partial` — remove all entries whose hostname contains the provided pattern
+- `toggle --partial` — toggle all entries whose hostname contains the provided pattern
 
 ### Default hosts file path
 
@@ -368,7 +376,7 @@ hostcraft/
 ├── core/                  # hostcraft-core — shared library
 │   └── src/
 │       ├── host/          # HostEntry, HostStatus, HostError + operations
-│       │   ├── mod.rs     # Public API: parse_contents, add_entry, remove_entry, toggle_entry, edit_entry
+│       │   ├── mod.rs     # Public API: parse_contents, add_entry, edit_entry, remove_entry, remove_entries_matching, toggle_entry, toggle_entries_matching
 │       │   └── utils.rs   # Internal helpers
 │       └── file/          # File I/O
 │           ├── mod.rs     # Public API: read_file, write_file

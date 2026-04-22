@@ -1,10 +1,7 @@
-mod command;
-mod display;
-mod update;
-
 use clap::Parser;
-use command::{Cli, Command, run};
-use display::{print_error, print_update_notice};
+use hostcraft_cli::command::{Cli, Command, run};
+use hostcraft_cli::display::{print_error, print_update_notice};
+use hostcraft_cli::update;
 use std::process;
 
 fn main() {
