@@ -33,7 +33,9 @@ pub fn remove_entry(name: String, state: State<'_, AppState>) -> Result<(), Stri
     let (mut entries, path) = read_file_get_parsed_contents_and_path(&state)?;
 
     host::remove_entry(&mut entries, &name).map_err(|e| match e {
-        HostCraftError::EntryNotFound => format!("No entry found matching '{}'. {}", name, e),
+        HostCraftError::EntryNotFound => {
+            format!("No entry found with exact name '{}'. {}", name, e)
+        }
         _ => format!("Failed to remove entry: {}", e),
     })?;
     mark_internal_write(&state);
@@ -46,7 +48,9 @@ pub fn toggle_entry(name: String, state: State<'_, AppState>) -> Result<(), Stri
     let (mut entries, path) = read_file_get_parsed_contents_and_path(&state)?;
 
     host::toggle_entry(&mut entries, &name).map_err(|e| match e {
-        HostCraftError::EntryNotFound => format!("No entry found matching '{}'. {}", name, e),
+        HostCraftError::EntryNotFound => {
+            format!("No entry found with exact name '{}'. {}", name, e)
+        }
         _ => format!("Failed to toggle entry: {}", e),
     })?;
     mark_internal_write(&state);
@@ -64,7 +68,9 @@ pub fn edit_entry(
     let (mut entries, path) = read_file_get_parsed_contents_and_path(&state)?;
 
     host::edit_entry(&mut entries, &old_name, new_ip, &new_name).map_err(|e| match e {
-        HostCraftError::EntryNotFound => format!("No entry found matching '{}'. {}", old_name, e),
+        HostCraftError::EntryNotFound => {
+            format!("No entry found with exact name '{}'. {}", old_name, e)
+        }
         HostCraftError::DuplicateEntry => format!("Entry already exists. {}", e),
         HostCraftError::NoChange => format!("No change needed for '{}'. {}", old_name, e),
         _ => format!("Failed to edit entry: {}", e),
