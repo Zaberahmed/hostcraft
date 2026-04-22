@@ -1659,9 +1659,9 @@ dependencies = [
 
 [[package]]
 name = "hostcraft-gui"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
- "hostcraft-core 2.0.0",
+ "hostcraft-core 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "notify",
  "serde",
  "serde_json",
