@@ -23,8 +23,8 @@ Every consumer in the ecosystem depends on this crate for its data types and bus
 ## Design Philosophy
 
 - **No I/O surprises** — the library never prints to stdout or stderr. It returns data and `Result` types; what you do with them is up to you.
-- **Partial name matching** — `remove` and `toggle` operate on substrings, so `"myapp"` matches `myapp.local`, `myapp.dev`, and so on.
-- **Exact matching for edits** — `edit` requires the full hostname to prevent accidental bulk modifications.
+- **Exact matching by default** — `remove`, `toggle`, and `edit` require the full hostname to prevent accidental bulk modifications.
+- **Explicit partial matching** — bulk substring operations are available through opt-in helpers: `remove_entries_matching` and `toggle_entries_matching`.
 - **Active / Inactive model** — entries are never silently deleted to disable them. Inactive entries are preserved as commented-out lines (`# ip hostname`) so they can be re-enabled at any time.
 - **Duplicate safety** — adding or editing an entry to a combination that already exists is rejected before any write occurs.
 - **IPv4 and IPv6** — all IP handling goes through Rust's standard `IpAddr`, so both address families work out of the box.
@@ -35,7 +35,7 @@ Every consumer in the ecosystem depends on this crate for its data types and bus
 
 ```toml
 [dependencies]
-hostcraft-core = "1.1.2"
+hostcraft-core = "2.0.0"
 ```
 
 ---
@@ -133,15 +133,32 @@ match edit_entry(&mut entries, "myapp.local", new_ip, "myapp.dev") {
 
 ### Removing an entry
 
-Matches by substring — all entries whose hostname contains `partial_name` are removed. Returns `Err(HostCraftError::EntryNotFound)` if nothing matched.
+Requires an exact hostname match. Returns `Err(HostCraftError::EntryNotFound)` if no exact name matched.
 
 ```rust
 use hostcraft_core::HostCraftError;
 use hostcraft_core::host::remove_entry;
 
-match remove_entry(&mut entries, "myapp") {
+match remove_entry(&mut entries, "myapp.local") {
     Ok(())                                  => println!("Removed"),
-    Err(HostCraftError::EntryNotFound)      => println!("No match found"),
+    Err(HostCraftError::EntryNotFound)      => println!("No entry with that exact name"),
+    Err(e)                                  => println!("Error: {}", e),
+}
+```
+
+---
+
+### Removing entries by partial match (opt-in)
+
+Use `remove_entries_matching` to remove all hostnames containing a substring. Returns the number of removed entries.
+
+```rust
+use hostcraft_core::HostCraftError;
+use hostcraft_core::host::remove_entries_matching;
+
+match remove_entries_matching(&mut entries, "myapp") {
+    Ok(count)                               => println!("Removed {} entries", count),
+    Err(HostCraftError::EntryNotFound)      => println!("No entries contain that pattern"),
     Err(e)                                  => println!("Error: {}", e),
 }
 ```
@@ -157,15 +174,32 @@ Toggling flips an entry between active and inactive without removing it:
 # 127.0.0.1 myapp.local  →    127.0.0.1 myapp.local
 ```
 
-All entries matching the partial name are toggled in one call.
+Requires an exact hostname match.
 
 ```rust
 use hostcraft_core::HostCraftError;
 use hostcraft_core::host::toggle_entry;
 
-match toggle_entry(&mut entries, "myapp") {
+match toggle_entry(&mut entries, "myapp.local") {
     Ok(())                                  => println!("Toggled"),
-    Err(HostCraftError::EntryNotFound)      => println!("No match found"),
+    Err(HostCraftError::EntryNotFound)      => println!("No entry with that exact name"),
+    Err(e)                                  => println!("Error: {}", e),
+}
+```
+
+---
+
+### Toggling entries by partial match (opt-in)
+
+Use `toggle_entries_matching` to toggle all hostnames containing a substring. Returns the number of toggled entries.
+
+```rust
+use hostcraft_core::HostCraftError;
+use hostcraft_core::host::toggle_entries_matching;
+
+match toggle_entries_matching(&mut entries, "myapp") {
+    Ok(count)                               => println!("Toggled {} entries", count),
+    Err(HostCraftError::EntryNotFound)      => println!("No entries contain that pattern"),
     Err(e)                                  => println!("Error: {}", e),
 }
 ```
@@ -255,7 +289,7 @@ pub enum HostCraftError {
     PermissionDenied(String),    // Write rejected — process lacks privileges
     UnsupportedPlatform(String), // get_hosts_path called on an unrecognised OS
     DuplicateEntry,              // add_entry / edit_entry: same IP + hostname already exists
-    EntryNotFound,               // remove_entry / toggle_entry / edit_entry: no name matched
+    EntryNotFound,               // remove/toggle/edit operations: no name matched
     NoChange,                    // edit_entry: supplied values are identical to current ones
 }
 ```
@@ -266,7 +300,7 @@ pub enum HostCraftError {
 | `PermissionDenied(m)` | `platform::write_hosts_to`            | `"{m}"` (platform-specific hint included)              |
 | `UnsupportedPlatform` | `platform::get_hosts_path`            | `"Unsupported platform: {os}"`                         |
 | `DuplicateEntry`      | `add_entry`, `edit_entry`             | `"You have inserted a duplicate entry."`               |
-| `EntryNotFound`       | `remove_entry`, `toggle_entry`, `edit_entry` | `"Please check the name and try again."`        |
+| `EntryNotFound`       | `remove_entry`, `remove_entries_matching`, `toggle_entry`, `toggle_entries_matching`, `edit_entry` | `"Please check the name and try again."`        |
 | `NoChange`            | `edit_entry`                          | `"Entry already exists. No changes made."`             |
 
 **Trait implementations:** `Debug`, `Display`, `std::error::Error`
@@ -290,8 +324,10 @@ Re-exported at the crate root as `hostcraft_core::Result<T>`. All fallible funct
 | `parse_contents` | `(impl Iterator<Item = io::Result<String>>) -> Vec<HostEntry>`                                         | Parses a line iterator into a list of entries                   |
 | `add_entry`      | `(&mut Vec<HostEntry>, IpAddr, impl Into<String>) -> Result<()>`                                        | Adds an active entry; rejects duplicates                        |
 | `edit_entry`     | `(&mut Vec<HostEntry>, impl Into<String>, IpAddr, impl Into<String>) -> Result<()>`                     | Edits an entry by exact name; preserves status                  |
-| `remove_entry`   | `(&mut Vec<HostEntry>, &str) -> Result<()>`                                                             | Removes all entries matching the partial name                   |
-| `toggle_entry`   | `(&mut Vec<HostEntry>, &str) -> Result<()>`                                                             | Toggles all entries matching the partial name                   |
+| `remove_entry`   | `(&mut Vec<HostEntry>, &str) -> Result<()>`                                                             | Removes entries matching the exact name                         |
+| `remove_entries_matching` | `(&mut Vec<HostEntry>, &str) -> Result<usize>`                                                  | Removes all entries containing the pattern; returns count       |
+| `toggle_entry`   | `(&mut Vec<HostEntry>, &str) -> Result<()>`                                                             | Toggles entries matching the exact name                         |
+| `toggle_entries_matching` | `(&mut Vec<HostEntry>, &str) -> Result<usize>`                                                  | Toggles all entries containing the pattern; returns count       |
 
 ---
 
@@ -320,7 +356,7 @@ If you are building a consumer on top of `hostcraft-core`, the typical pattern i
 
 1. **Read** with `file::read_file`
 2. **Parse** with `host::parse_contents` → `Vec<HostEntry>`
-3. **Mutate** using `add_entry` / `edit_entry` / `remove_entry` / `toggle_entry`
+3. **Mutate** using `add_entry` / `edit_entry` / `remove_entry` / `toggle_entry` (or opt-in partial helpers when you explicitly want bulk matching)
 4. **Present** however your layer requires — the types all implement `Display`, `Debug`, and `Serialize`
 5. **Write** back with `platform::write_hosts_to` (permission-aware) or `file::write_file` (raw)
 
