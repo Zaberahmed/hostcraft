@@ -12,8 +12,12 @@ export function useTauriCommands() {
   const add_entry = async (ip: string, name: string) => {
     return await invoke("add_entry", { ip, name });
   };
-  const edit_entry = async (id: string, ip: string, name: string) => {
-    return await invoke("edit_entry", { id, ip, name });
+  const edit_entry = async (
+    oldName: string,
+    newIp: string,
+    newName: string,
+  ) => {
+    return await invoke("edit_entry", { oldName, newIp, newName });
   };
   const toggle_entry = async (name: string) => {
     return await invoke("toggle_entry", { name });

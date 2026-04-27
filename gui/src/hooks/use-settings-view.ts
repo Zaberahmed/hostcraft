@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { toast } from "sonner";
 
-type SectionTitles = "General" | "Network";
+export type SectionTitles = "General" | "Network";
 
 export type ResetSection = {
   id: string;

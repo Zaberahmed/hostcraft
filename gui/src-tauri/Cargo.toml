@@ -1,6 +1,6 @@
 [package]
 name = "hostcraft-gui"
-version = "0.6.0"
+version = "0.6.1"
 description = "GUI application to manage your system hosts"
 authors = ["you"]
 edition = "2021"

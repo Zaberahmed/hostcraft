@@ -1,17 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  ServerStack01Icon,
-  SecuredNetworkIcon,
-  MoreIcon,
-  Settings01Icon,
-} from "@hugeicons/core-free-icons";
-import { cn } from "@/lib/utils";
-import { SettingRow } from "./setting-row";
-import { SettingSection } from "./setting-section";
+import { Input } from "@/components/ui/input";
+import { RadioInput } from "@/components/ui/radio";
 import { Toggle } from "@/components/ui/toggle";
 import type { AppSettings, HostsPath } from "@/entities/settings.model";
 import type { ResetSection } from "@/hooks/use-settings-view";
+import {
+  MoreIcon,
+  SecuredNetworkIcon,
+  ServerStack01Icon,
+  Settings01Icon,
+} from "@hugeicons/core-free-icons";
+import { SettingRow } from "./setting-row";
+import { SettingSection } from "./setting-section";
+import { isResettable } from "./utils";
 
 type SettingSectionsProps = {
   handleChange: (
@@ -35,30 +37,27 @@ export function SettingSections({
   flushDNSCache,
   openHostsFileExternally,
 }: SettingSectionsProps) {
+  const {
+    should_follow_system_theme,
+    auto_reload,
+    show_update_notifications,
+    dns_validation,
+    hosts_path,
+  } = settingsLocalState ?? {};
   return (
     <div className="space-y-4">
       <GeneralSection
-        isResettable={
-          !!resetState.find((section) => section.title === "General")
-            ?.shouldReset
-        }
-        followSystemTheme={!!settingsLocalState?.should_follow_system_theme}
-        autoReload={!!settingsLocalState?.auto_reload}
-        showUpdateNotifications={
-          !!settingsLocalState?.show_update_notifications
-        }
+        isResettable={isResettable(resetState, "General")}
+        followSystemTheme={!!should_follow_system_theme}
+        autoReload={!!auto_reload}
+        showUpdateNotifications={!!show_update_notifications}
         handleChange={handleChange}
       />
 
       <NetworkSection
-        isResettable={
-          !!resetState.find((section) => section.title === "Network")
-            ?.shouldReset
-        }
-        dnsValidation={!!settingsLocalState?.dns_validation}
-        hosts_path={
-          settingsLocalState?.hosts_path ?? { kind: "default", value: "" }
-        }
+        isResettable={isResettable(resetState, "Network")}
+        dnsValidation={!!dns_validation}
+        hosts_path={hosts_path ?? { kind: "default", value: "" }}
         handleChange={handleChange}
         setHostsPathDefault={setHostsPathDefault}
         setHostsPathCustom={setHostsPathCustom}
@@ -181,41 +180,27 @@ export function NetworkSection({
       >
         <div className="space-y-2">
           <div className="flex w-80 flex-wrap items-center gap-2">
-            <label className="inline-flex items-center gap-2 text-sm font-label text-on-surface">
-              <input
-                type="radio"
-                name="hosts-path-mode"
-                checked={isDefaultHostPath}
-                onChange={setHostsPathDefault}
-              />
-              Use system default
-            </label>
+            <RadioInput
+              labelText="Use system default"
+              name="hosts-path-mode"
+              checked={isDefaultHostPath}
+              onChange={setHostsPathDefault}
+            />
 
-            <label className="inline-flex items-center gap-2 text-sm font-label text-on-surface">
-              <input
-                type="radio"
-                name="hosts-path-mode"
-                checked={!isDefaultHostPath}
-                onChange={() => setHostsPathCustom(hostsPathValue)}
-              />
-              Use custom path
-            </label>
+            <RadioInput
+              labelText="Use custom path"
+              name="hosts-path-mode"
+              checked={!isDefaultHostPath}
+              onChange={() => setHostsPathCustom(hostsPathValue)}
+            />
           </div>
 
-          <input
+          <Input
             type="text"
             value={hostsPathValue}
             onChange={(e) => setHostsPathCustom(e.target.value)}
             disabled={isDefaultHostPath}
             autoFocus={!isDefaultHostPath}
-            className={cn(
-              "w-full rounded-lg text-sm font-label",
-              "px-3 py-1.5",
-              "bg-surface-container-low text-on-surface",
-              "ghost-border",
-              "focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest",
-              "transition-all",
-            )}
           />
         </div>
       </SettingRow>
