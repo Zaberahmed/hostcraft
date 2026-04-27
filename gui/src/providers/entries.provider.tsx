@@ -95,7 +95,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        await edit_entry(id, ip, name);
+        await edit_entry(old_entry.hostname, ip, name);
         toast.success("Entry edited successfully");
         refetchEntries();
         closeModal();
@@ -103,7 +103,7 @@ export function EntriesProvider({ children }: { children: ReactNode }) {
         showErrorToast(error, "Editing");
       }
     },
-    [closeModal],
+    [closeModal, entries],
   );
 
   const toggleEntry = useCallback(async (name: string) => {
